@@ -8,6 +8,7 @@ import {
   MORBIHAN_BBOX,
 } from '../src/lib/overpass.js';
 import type { OverpassElement } from '../src/lib/types/osm.js';
+import type { db } from '../src/db/index.js';
 
 test('buildOverpassQuery includes correct bounding box and amenity tags', () => {
   const query = buildOverpassQuery();
@@ -59,6 +60,7 @@ test('routeOsmElements partitions slipways into places and amenities into amenit
 
   assert.equal(routed.slipways.length, 1);
   assert.equal(routed.slipways[0].externalId, 'osm:node:1001');
+  assert.equal(routed.slipways[0].slug, 'cale-node-1001');
   assert.equal(routed.slipways[0].category, 'NAUTICAL');
   assert.equal(routed.slipways[0].contextualRules.tideConstraint, 'HIGH_TIDE_ONLY');
 
@@ -131,7 +133,9 @@ test('routeOsmElements maps various amenity types and ignores elements without c
   const routed = routeOsmElements(mockElements);
 
   assert.equal(routed.slipways.length, 2);
+  assert.equal(routed.slipways[0].slug, 'cale-node-5007');
   assert.equal(routed.slipways[0].contextualRules.tideConstraint, 'HIGH_TIDE_ONLY');
+  assert.equal(routed.slipways[1].slug, 'cale-node-5008');
   assert.equal(routed.slipways[1].contextualRules.tideConstraint, 'ALL_TIDES');
 
   assert.equal(routed.amenities.length, 5); // 5006 skipped because no coordinates
@@ -143,14 +147,17 @@ test('routeOsmElements maps various amenity types and ignores elements without c
   assert.equal(routed.amenities[4].type, 'OTHER');
 });
 
-test('fetchOverpassElements falls back to second mirror when first fails', async () => {
+test('fetchOverpassElements falls back to second mirror when first fails with HTTP error', async () => {
   const originalFetch = globalThis.fetch;
   let calls = 0;
 
   globalThis.fetch = (async (url: string | URL | Request) => {
     calls++;
     if (calls === 1) {
-      throw new Error('Connection timed out on primary mirror');
+      return new Response('Rate limit reached', {
+        status: 429,
+        statusText: 'Too Many Requests',
+      });
     }
     return new Response(
       JSON.stringify({
@@ -174,7 +181,7 @@ test('fetchOverpassElements falls back to second mirror when first fails', async
   }
 });
 
-test('syncOsmData handles success and db error resilience gracefully', async () => {
+test('syncOsmData correctly flags partial failures when database upsert fails', async () => {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async () => {
     return new Response(
@@ -193,8 +200,8 @@ test('syncOsmData handles success and db error resilience gracefully', async () 
 
   const insertedTables: string[] = [];
   const mockDb = {
-    insert: (table: any) => ({
-      values: (val: any) => ({
+    insert: (table: unknown) => ({
+      values: (val: { externalId?: string }) => ({
         onConflictDoUpdate: async () => {
           if (val.externalId === 'osm:node:102') {
             throw new Error('DB constraint error simulation');
@@ -207,13 +214,49 @@ test('syncOsmData handles success and db error resilience gracefully', async () 
   };
 
   try {
-    const report = await syncOsmData(mockDb);
-    assert.equal(report.success, true);
+    const report = await syncOsmData(mockDb as unknown as typeof db);
+    assert.equal(report.success, false); // Partial failure flagged
     assert.equal(report.totalParsed, 3);
     assert.equal(report.slipwaysUpserted, 1);
     assert.equal(report.amenitiesUpserted, 1);
     assert.equal(report.errors.length, 1);
     assert.ok(report.errors[0].includes('osm:node:102'));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('syncOsmData reports success true when all upserts succeed', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(
+      JSON.stringify({
+        version: 0.6,
+        generator: 'Overpass API',
+        elements: [
+          { type: 'node', id: 301, lat: 47.5, lon: -2.8, tags: { leisure: 'slipway' } },
+          { type: 'node', id: 302, lat: 47.5, lon: -2.8, tags: { amenity: 'drinking_water' } },
+        ],
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }) as typeof fetch;
+
+  const mockDb = {
+    insert: (_table: unknown) => ({
+      values: (_val: unknown) => ({
+        onConflictDoUpdate: async () => Promise.resolve(),
+      }),
+    }),
+  };
+
+  try {
+    const report = await syncOsmData(mockDb as unknown as typeof db);
+    assert.equal(report.success, true);
+    assert.equal(report.totalParsed, 2);
+    assert.equal(report.slipwaysUpserted, 1);
+    assert.equal(report.amenitiesUpserted, 1);
+    assert.equal(report.errors.length, 0);
   } finally {
     globalThis.fetch = originalFetch;
   }
