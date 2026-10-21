@@ -72,7 +72,7 @@ export function routeOsmElements(elements: OverpassElement[]): {
 
       slipways.push({
         externalId: extId,
-        slug: `cale-${el.id}`,
+        slug: `cale-${el.type}-${el.id}`,
         name,
         shortDescription: tags.description || "Cale de mise à l'eau répertoriée sur OpenStreetMap.",
         category: 'NAUTICAL',
@@ -123,10 +123,12 @@ export async function fetchOverpassElements(query = buildOverpassQuery()): Promi
         signal: AbortSignal.timeout(35000),
       });
 
-      if (res.ok) {
-        const json = (await res.json()) as OverpassResponse;
-        return json.elements ?? [];
+      if (!res.ok) {
+        throw new Error(`Mirror ${endpoint} returned HTTP ${res.status}: ${res.statusText}`);
       }
+
+      const json = (await res.json()) as OverpassResponse;
+      return json.elements ?? [];
     } catch (err) {
       lastError = err instanceof Error ? err : new Error(String(err));
     }
@@ -139,7 +141,7 @@ export async function fetchOverpassElements(query = buildOverpassQuery()): Promi
  * Synchronise les données OSM en base avec upsert idempotent.
  * @param dbClient Client Drizzle optionnel pour injection de dépendance en test
  */
-export async function syncOsmData(dbClient: any = defaultDb): Promise<OsmSyncReport> {
+export async function syncOsmData(dbClient: typeof defaultDb = defaultDb): Promise<OsmSyncReport> {
   const report: OsmSyncReport = {
     success: true,
     slipwaysUpserted: 0,
@@ -197,9 +199,9 @@ export async function syncOsmData(dbClient: any = defaultDb): Promise<OsmSyncRep
       }
     }
   } catch (err) {
-    report.success = false;
     report.errors.push(`Overpass fetch failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  report.success = report.errors.length === 0;
   return report;
 }
