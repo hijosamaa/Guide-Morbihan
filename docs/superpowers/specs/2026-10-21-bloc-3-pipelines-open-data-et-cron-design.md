@@ -2,7 +2,7 @@
 
 - **Date :** 21 Octobre 2026
 - **Projet :** Le Copilote Contextuel du Golfe du Morbihan
-- **Sous-Projet :** Bloc 3 — Ingestion Météo AROME (Open-Meteo), Ingestion Équipements OSM (Overpass), Parseur GPX Géodésique & Route Cron Sécurisée
+- **Sous-Projet :** Bloc 3 — Ingestion Météo AROME (Open-Meteo 6 Secteurs), Ingestion Équipements OSM Élargis (Overpass), Parseur GPX Géodésique & Route Cron Sécurisée
 - **Statut :** Validé — Prêt pour implémentation
 
 ---
@@ -13,12 +13,12 @@ Le Bloc 3 met en place l'infrastructure d'alimentation asynchrone des données d
 
 Les 4 responsabilités exclusives de ce bloc sont :
 1. **Connecteur Open-Meteo (`src/lib/open-meteo.ts`)** :
-   - Récupération des prévisions météo temps réel à haute résolution (modèle AROME Météo-France) pour les 5 secteurs côtiers stratégiques.
+   - Récupération des prévisions météo temps réel à haute résolution (modèle AROME Météo-France) pour **6 secteurs côtiers stratégiques** (`VANNES`, `ARRADON`, `LOCMARIAQUER`, `SARZEAU`, `QUIBERON`, `ETEL`).
    - Calcul de la direction cardinale normalisée (`N`, `NE`, `E`, etc.) et détection de la pluie.
    - Upsert idempotent dans la table `weather_snapshots`.
 2. **Connecteur Overpass OpenStreetMap (`src/lib/overpass.ts`)** :
    - Ingestion des cales de mise à l'eau (`leisure=slipway`) vers la table principale `places` (`category: 'NAUTICAL'`).
-   - Ingestion des équipements d'usage courant (fontaines `amenity=drinking_water` et toilettes `amenity=toilets`) vers une table légère dédiée `amenities`.
+   - Ingestion des équipements d'usage pratique (fontaines d'eau, sanitaires publics, tables de pique-nique, parkings vélos, douches de plage, défibrillateurs, boulangeries) vers une table légère dédiée `amenities`.
 3. **Parseur GPX Géodésique (`src/lib/gpx-parser.ts`)** :
    - Conversion tolérante de flux XML GPX en GeoJSON `LineString`.
    - Calcul mathématique de la distance cumulée (formule de Haversine) et du dénivelé (D+/D-) avec **filtre d'hystérésis altimétrique (seuil de 3 m)** pour éliminer le bruit GPS mobile.
@@ -80,9 +80,14 @@ Pour préserver la clarté du catalogue `places` tout en indexant efficacement l
 ```typescript
 // Nouvel enum pour les types d'équipements utilitaires
 export const amenityTypeEnum = pgEnum('amenity_type', [
-  'DRINKING_WATER', // Fontaines d'eau potable
-  'TOILETS',        // Toilettes publiques
-  'OTHER',          // Extensions futures
+  'DRINKING_WATER',    // Fontaines d'eau potable (amenity=drinking_water)
+  'TOILETS',           // Toilettes publiques (amenity=toilets)
+  'PICNIC_TABLE',      // Tables de pique-nique (leisure=picnic_table)
+  'BICYCLE_PARKING',   // Arceaux et abris vélos (amenity=bicycle_parking)
+  'BEACH_SHOWER',      // Douches de plage (amenity=shower)
+  'DEFIBRILLATOR',     // Défibrillateurs DAE (emergency=defibrillator)
+  'BAKERY',            // Boulangeries sur les sentiers (shop=bakery)
+  'OTHER',             // Extensions futures
 ]);
 
 // Table des équipements pratiques
@@ -114,10 +119,10 @@ export type NewAmenity = typeof amenities.$inferInsert;
 
 ### 3.1 Connecteur Open-Meteo (`src/lib/open-meteo.ts`)
 
-#### 1. Configuration des 5 Secteurs Côtiers
+#### 1. Configuration des 6 Secteurs Côtiers
 ```typescript
 export interface SectorConfig {
-  sector: 'VANNES' | 'ARRADON' | 'SARZEAU' | 'QUIBERON' | 'ETEL';
+  sector: 'VANNES' | 'ARRADON' | 'LOCMARIAQUER' | 'SARZEAU' | 'QUIBERON' | 'ETEL';
   name: string;
   latitude: number;
   longitude: number;
@@ -125,7 +130,8 @@ export interface SectorConfig {
 
 export const COASTAL_SECTORS: Record<string, SectorConfig> = {
   VANNES: { sector: 'VANNES', name: 'Fond de Golfe (Vannes / Séné)', latitude: 47.6586, longitude: -2.7599 },
-  ARRADON: { sector: 'ARRADON', name: 'Golfe Ouest (Arradon / Baden)', latitude: 47.6258, longitude: -2.8277 },
+  ARRADON: { sector: 'ARRADON', name: 'Golfe Intérieur (Arradon / Îles / Baden)', latitude: 47.6258, longitude: -2.8277 },
+  LOCMARIAQUER: { sector: 'LOCMARIAQUER', name: 'Entrée de Golfe Ouest & Baie de Quiberon', latitude: 47.5695, longitude: -2.9443 },
   SARZEAU: { sector: 'SARZEAU', name: 'Presqu\'île de Rhuys (Sarzeau / Port-Navalo)', latitude: 47.5278, longitude: -2.7694 },
   QUIBERON: { sector: 'QUIBERON', name: 'Presqu\'île de Quiberon & Océan', latitude: 47.4839, longitude: -3.1206 },
   ETEL: { sector: 'ETEL', name: 'Ria d\'Étel & Côte Sauvage Nord', latitude: 47.6575, longitude: -3.2003 },
@@ -162,11 +168,19 @@ Zone littorale du Morbihan : Sud `47.45`, Ouest `-3.25`, Nord `47.75`, Est `-2.6
 ```overpassql
 [out:json][timeout:25];
 (
+  // Cales de mise à l'eau (points et voies destinées à la table places)
   node["leisure"="slipway"](47.45,-3.25,47.75,-2.60);
   way["leisure"="slipway"](47.45,-3.25,47.75,-2.60);
+
+  // Équipements pratiques du littoral (destinés à la table amenities)
   node["amenity"="drinking_water"](47.45,-3.25,47.75,-2.60);
   node["amenity"="toilets"](47.45,-3.25,47.75,-2.60);
   way["amenity"="toilets"](47.45,-3.25,47.75,-2.60);
+  node["leisure"="picnic_table"](47.45,-3.25,47.75,-2.60);
+  node["amenity"="bicycle_parking"](47.45,-3.25,47.75,-2.60);
+  node["amenity"="shower"](47.45,-3.25,47.75,-2.60);
+  node["emergency"="defibrillator"](47.45,-3.25,47.75,-2.60);
+  node["shop"="bakery"](47.45,-3.25,47.75,-2.60);
 );
 out center tags;
 ```
@@ -178,10 +192,10 @@ out center tags;
   - `slug` : normalisé (`cale-de-...` ou `cale-slipway-<id>`).
   - `contextualRules` : `{ tideConstraint: tags.tidal === 'yes' ? 'HIGH_TIDE_ONLY' : 'ALL_TIDES', dogsAllowedSummer: true, strollerFriendly: true, rainFriendly: false }`.
   - Upsert sur `places.externalId` sans écraser les descriptions éditoriales manuelles.
-- **Fontaines & Toilettes $\rightarrow$ Table `amenities`** :
+- **Équipements Pratiques $\rightarrow$ Table `amenities`** :
   - `osmId` : `node:<id>` ou `way:<id>`.
-  - `type` : `'DRINKING_WATER'` ou `'TOILETS'`.
-  - `properties` : stockage JSONB des tags pertinents (`wheelchair`, `fee`, `seasonal`, `access`).
+  - `type` : `'DRINKING_WATER'`, `'TOILETS'`, `'PICNIC_TABLE'`, `'BICYCLE_PARKING'`, `'BEACH_SHOWER'`, `'DEFIBRILLATOR'`, `'BAKERY'` ou `'OTHER'`.
+  - `properties` : stockage JSONB des tags pertinents (`wheelchair`, `fee`, `seasonal`, `access`, `opening_hours`).
   - Upsert sur `amenities.osmId`.
 
 #### 3. Résilience Réseau
