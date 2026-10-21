@@ -184,17 +184,52 @@ export default {
   --foreground: #0f172a;
 }
 
+/* Règle mobile-native : suppression du flash gris tactile et inflation de police */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100dvh;
+}
+
+/* Cibles tactiles réactives et suppression du délai de 300ms */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Empêcher le zoom automatique sur focus input iOS Safari */
+input,
+textarea,
+select {
+  font-size: 16px;
 }
 ```
 
 `src/app/layout.tsx` :
 ```typescript
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+
+// Configuration viewport mobile-native conforme aux standards PWA
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: 'Le Copilote Contextuel du Golfe du Morbihan',
