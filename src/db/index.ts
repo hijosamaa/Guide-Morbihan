@@ -8,14 +8,25 @@ dotenv.config();
 
 const connectionString = process.env.DATABASE_URL;
 
-const pool = new pg.Pool({
-  connectionString,
-  ssl: connectionString?.includes('supabase.co') || connectionString?.includes('pooler.supabase.com')
-    ? { rejectUnauthorized: false }
-    : undefined,
-  max: 10,
-  idleTimeoutMillis: 30000,
-});
+declare global {
+  // eslint-disable-next-line no-var
+  var __dbPool: pg.Pool | undefined;
+}
+
+const pool =
+  globalThis.__dbPool ??
+  new pg.Pool({
+    connectionString,
+    ssl: connectionString?.includes('supabase.co') || connectionString?.includes('pooler.supabase.com')
+      ? { rejectUnauthorized: false }
+      : undefined,
+    max: 10,
+    idleTimeoutMillis: 30000,
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.__dbPool = pool;
+}
 
 export const db = drizzle(pool, { schema });
 export { pool };
