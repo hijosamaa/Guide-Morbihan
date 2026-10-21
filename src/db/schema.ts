@@ -134,3 +134,38 @@ export type Place = typeof places.$inferSelect;
 export type NewPlace = typeof places.$inferInsert;
 export type TideEvent = typeof tideEvents.$inferSelect;
 export type WeatherSnapshot = typeof weatherSnapshots.$inferSelect;
+
+// Énumération des équipements utilitaires
+export const amenityTypeEnum = pgEnum('amenity_type', [
+  'DRINKING_WATER',    // Fontaines d'eau potable
+  'TOILETS',           // Toilettes publiques
+  'PICNIC_TABLE',      // Tables de pique-nique
+  'BICYCLE_PARKING',   // Arceaux et abris vélos
+  'BEACH_SHOWER',      // Douches de plage
+  'DEFIBRILLATOR',     // Défibrillateurs DAE
+  'BAKERY',            // Boulangeries sur les sentiers
+  'OTHER',             // Extensions futures
+]);
+
+// Table des équipements pratiques
+export const amenities = pgTable(
+  'amenities',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    osmId: varchar('osm_id', { length: 64 }).notNull().unique(),
+    type: amenityTypeEnum('type').notNull(),
+    name: varchar('name', { length: 255 }),
+    latitude: doublePrecision('latitude').notNull(),
+    longitude: doublePrecision('longitude').notNull(),
+    properties: jsonb('properties').$type<Record<string, unknown>>().default({}).notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    coordsIdx: index('idx_amenities_coords').on(table.latitude, table.longitude),
+    typeIdx: index('idx_amenities_type').on(table.type),
+  })
+);
+
+export type Amenity = typeof amenities.$inferSelect;
+export type NewAmenity = typeof amenities.$inferInsert;
+
