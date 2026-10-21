@@ -9,6 +9,7 @@ import {
   timestamp,
   jsonb,
   index,
+  uniqueIndex,
   pgEnum,
 } from 'drizzle-orm/pg-core';
 
@@ -112,6 +113,7 @@ export const tideEvents = pgTable(
   },
   (table) => ({
     harborTimeIdx: index('idx_harbor_time').on(table.harbor, table.eventTimestamp),
+    harborTimeUniqueIdx: uniqueIndex('idx_harbor_time_unique').on(table.harbor, table.eventTimestamp),
   })
 );
 

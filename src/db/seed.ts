@@ -38,9 +38,8 @@ async function runSeed() {
 
   // 2. Insertion des Événements de Marée
   console.log(`⏱️ Insertion de ${seedTides.length} événements de marées...`);
-  await db.delete(tideEvents);
   for (const tide of seedTides) {
-    await db.insert(tideEvents).values(tide);
+    await db.insert(tideEvents).values(tide).onConflictDoNothing();
   }
   console.log('✅ Événements de marée insérés.');
 

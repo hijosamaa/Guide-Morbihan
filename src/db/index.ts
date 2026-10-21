@@ -24,6 +24,10 @@ const pool =
     idleTimeoutMillis: 30000,
   });
 
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle database client', err);
+});
+
 if (process.env.NODE_ENV !== 'production') {
   globalThis.__dbPool = pool;
 }

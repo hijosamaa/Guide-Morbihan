@@ -14,4 +14,7 @@ test('Schema defines all expected tables and enums', () => {
   assert.ok(places.latitude);
   assert.ok(places.longitude);
   assert.ok(places.contextualRules);
+  assert.ok(tideEvents.harbor);
+  assert.ok(tideEvents.eventTimestamp);
+  assert.ok(weatherSnapshots.sector);
 });

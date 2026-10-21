@@ -11,9 +11,8 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - CRON_SECRET=${CRON_SECRET}
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
+    # depends_on:
+    #   - db # Optionnel : décommenter si conteneur db local utilisé au lieu de Supabase Cloud distant (DATABASE_URL)
 
   # Service optionnel si bascule locale ou VPS sans Supabase Cloud
   db:
