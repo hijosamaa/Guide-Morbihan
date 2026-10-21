@@ -108,6 +108,62 @@ test('Indoor heritage site is promoted during rain while beach is demoted', () =
   assert.equal(evalMuseum.badge, 'IDEAL');
   assert.equal(evalMuseum.score > evalTrail.score, true);
   assert.equal(evalTrail.badge !== 'IDEAL', true);
+  assert.equal(evalTrail.titleReason, 'Activité de plein air déconseillée sous la pluie');
+});
+
+test('Strong exposed wind caps badge at WARNING even with favorable tide', () => {
+  const windyWeather: WeatherContext = {
+    ...mockWeatherGood,
+    windSpeedKnots: 24,
+    windCardinal: 'S', // Not sheltered
+  };
+
+  const highTideBeach = {
+    slug: 'plage-ouverte',
+    name: 'Plage Ouverte',
+    contextualRules: {
+      tideConstraint: 'HIGH_TIDE_ONLY' as const,
+      shelteredFromWindDirections: ['N', 'NE'] as const, // Exposed to S
+      dogsAllowedSummer: false,
+      strollerFriendly: true,
+      rainFriendly: false,
+    },
+    isSponsored: false,
+  };
+
+  const result = evaluatePlaceContext(highTideBeach, mockTideStatusHigh.timestamp, mockTideStatusHigh, windyWeather);
+  assert.equal(result.isSheltered, false);
+  assert.equal(result.badge, 'WARNING');
+  assert.equal(result.reasons.some((r) => r.includes('Exposé au vent fort')), true);
+});
+
+test('evaluatePlaceContext propagates isSponsored for seamless sorting', () => {
+  const sponsoredPlace = {
+    slug: 'sponsored-creperie',
+    name: 'Crêperie du Port',
+    contextualRules: {
+      tideConstraint: 'ALL_TIDES' as const,
+      dogsAllowedSummer: true,
+      strollerFriendly: true,
+      rainFriendly: true,
+    },
+    isSponsored: true,
+  };
+
+  const normalPlace = {
+    ...sponsoredPlace,
+    slug: 'normal-creperie',
+    isSponsored: false,
+  };
+
+  const evalSponsored = evaluatePlaceContext(sponsoredPlace, new Date(), mockTideStatusHigh, mockWeatherGood);
+  const evalNormal = evaluatePlaceContext(normalPlace, new Date(), mockTideStatusHigh, mockWeatherGood);
+
+  assert.equal(evalSponsored.isSponsored, true);
+  assert.equal(evalNormal.isSponsored, false);
+
+  const sorted = sortPlacesByContext([evalNormal, evalSponsored]);
+  assert.equal(sorted[0].placeSlug, 'sponsored-creperie');
 });
 
 test('Berder passage context matches passage open/close status', () => {

@@ -164,6 +164,9 @@ export function evaluatePlaceContext(
     reasons.push(`Plage bien abritée du vent de ${weatherContext.windCardinal}.`);
   } else if (weatherContext.windSpeedKnots >= 20) {
     score -= 15;
+    if (!forceBadge) {
+      forceBadge = 'WARNING';
+    }
     reasons.push(`Exposé au vent fort (${Math.round(weatherContext.windSpeedKnots)} nds).`);
   }
 
@@ -178,6 +181,7 @@ export function evaluatePlaceContext(
       if (!forceBadge && score < 70) {
         forceBadge = 'WARNING';
       }
+      primaryReason = 'Activité de plein air déconseillée sous la pluie';
       reasons.push('Activité de plein air déconseillée sous la pluie.');
     }
   }
@@ -204,6 +208,7 @@ export function evaluatePlaceContext(
     titleReason: primaryReason || 'Conditions actuelles',
     reasons,
     isSheltered,
+    isSponsored: place.isSponsored,
     tideContext: {
       harbor: tideContext.harbor,
       waterHeightMeters: tideContext.waterHeightMeters,

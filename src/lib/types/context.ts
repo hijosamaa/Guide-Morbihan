@@ -61,6 +61,7 @@ export interface ContextEvaluationResult {
   titleReason: string;
   reasons: string[];
   isSheltered: boolean;
+  isSponsored?: boolean;
   tideContext?: {
     harbor: 'PORT_NAVALO' | 'VANNES';
     waterHeightMeters: number;

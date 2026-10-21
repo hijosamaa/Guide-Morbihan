@@ -191,3 +191,104 @@ test('Berder passage falls back to calculation when no official window provided'
   assert.equal(statusFallback.hazardNotice !== undefined, true);
 });
 
+test('Tascon passage fallback calculation and port-navalo commune resolution', () => {
+  assert.equal(resolveHarborForCommune('port-navalo'), 'PORT_NAVALO');
+
+  const tideEvents: TidePoint[] = [
+    {
+      harbor: 'VANNES',
+      eventType: 'HIGH',
+      eventTimestamp: new Date('2026-10-21T06:55:00Z'),
+      heightMeters: 4.25,
+      coefficient: 74,
+    },
+    {
+      harbor: 'VANNES',
+      eventType: 'LOW',
+      eventTimestamp: new Date('2026-10-21T13:20:00Z'),
+      heightMeters: 1.45,
+    },
+    {
+      harbor: 'VANNES',
+      eventType: 'HIGH',
+      eventTimestamp: new Date('2026-10-21T19:25:00Z'),
+      heightMeters: 4.4,
+      coefficient: 78,
+    },
+  ];
+
+  const tasconStatus = evaluatePassageStatus('passage-ile-tascon', new Date('2026-10-21T13:20:00Z'), {
+    tideEvents,
+  });
+  assert.equal(tasconStatus.isOpen, true);
+  assert.equal(tasconStatus.name, "Passage de l'Île Tascon");
+  assert.equal(tasconStatus.source, 'CALCULATED_FALLBACK');
+});
+
+test('Monotonicity and strict bounds during flood and ebb', () => {
+  const low: TidePoint = {
+    harbor: 'PORT_NAVALO',
+    eventType: 'LOW',
+    eventTimestamp: new Date('2026-10-21T11:00:00Z'),
+    heightMeters: 1.0,
+  };
+  const high: TidePoint = {
+    harbor: 'PORT_NAVALO',
+    eventType: 'HIGH',
+    eventTimestamp: new Date('2026-10-21T17:00:00Z'),
+    heightMeters: 5.0,
+    coefficient: 80,
+  };
+
+  let prevHeight = 0.99;
+  for (let mins = 0; mins <= 360; mins += 15) {
+    const t = new Date(low.eventTimestamp.getTime() + mins * 60000);
+    const height = interpolateWaterHeight(t, low, high);
+    assert.equal(height >= prevHeight, true, `Height at ${mins}m (${height}) must be >= previous (${prevHeight})`);
+    prevHeight = height;
+  }
+  assert.equal(Math.round(prevHeight * 100) / 100, 5.0);
+});
+
+test('Handles midnight crossing and high spring vs low neap tides', () => {
+  // Spring tide across midnight: LOW 23:00 (0.6m) -> HIGH 05:15 next day (5.8m, coeff 115)
+  const springLow: TidePoint = {
+    harbor: 'PORT_NAVALO',
+    eventType: 'LOW',
+    eventTimestamp: new Date('2026-10-21T23:00:00Z'),
+    heightMeters: 0.6,
+  };
+  const springHigh: TidePoint = {
+    harbor: 'PORT_NAVALO',
+    eventType: 'HIGH',
+    eventTimestamp: new Date('2026-10-22T05:15:00Z'),
+    heightMeters: 5.8,
+    coefficient: 115,
+  };
+
+  const statusMidnight = getTideStatus(new Date('2026-10-22T01:00:00Z'), 'PORT_NAVALO', [springLow, springHigh]);
+  assert.equal(statusMidnight.phase, 'FLOOD');
+  assert.equal(statusMidnight.coefficient, 115);
+  assert.equal(statusMidnight.tidalRangeMeters, 5.2);
+  assert.equal(statusMidnight.waterHeightMeters > 0.6 && statusMidnight.waterHeightMeters < 5.8, true);
+
+  // Neap tide: range is much smaller (coeff 35, range 1.8m)
+  const neapLow: TidePoint = {
+    harbor: 'VANNES',
+    eventType: 'LOW',
+    eventTimestamp: new Date('2026-10-21T12:00:00Z'),
+    heightMeters: 2.2,
+  };
+  const neapHigh: TidePoint = {
+    harbor: 'VANNES',
+    eventType: 'HIGH',
+    eventTimestamp: new Date('2026-10-21T18:10:00Z'),
+    heightMeters: 4.0,
+    coefficient: 35,
+  };
+
+  const statusNeap = getTideStatus(new Date('2026-10-21T15:05:00Z'), 'VANNES', [neapLow, neapHigh]);
+  assert.equal(statusNeap.coefficient, 35);
+  assert.equal(statusNeap.tidalRangeMeters, 1.8);
+});
+

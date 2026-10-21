@@ -62,6 +62,7 @@ export function interpolateWaterHeight(
 
 const OUTER_GULF_COMMUNES = new Set([
   'arzon',
+  'port-navalo',
   'saint-gildas-de-rhuys',
   'quiberon',
   'saint-pierre-quiberon',
