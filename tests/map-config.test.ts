@@ -22,7 +22,7 @@ test('GOLFE_MAP_CONFIG defines appropriate bounds and center for Golfe du Morbih
 });
 
 test('STATUS_STYLE_CONFIG contains Tailwind classes for all context statuses', () => {
-  const statuses = ['IDEAL', 'WARNING', 'DISCOURAGED', 'SPONSORED'];
+  const statuses = ['IDEAL', 'WARNING', 'DISCOURAGED', 'SPONSORED'] as const;
   for (const status of statuses) {
     const config = STATUS_STYLE_CONFIG[status];
     assert.ok(config, `Missing status style for ${status}`);

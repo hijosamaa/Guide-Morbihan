@@ -1,4 +1,5 @@
 import type { MarkerStyleTokens } from './types/map';
+import type { EvaluationStatus } from './types/context';
 
 export const GOLFE_MAP_CONFIG = {
   defaultCenter: [-2.7800, 47.5850] as [number, number],
@@ -37,7 +38,7 @@ export const GOLFE_MAP_CONFIG = {
   },
 };
 
-export const STATUS_STYLE_CONFIG: Record<string, MarkerStyleTokens> = {
+export const STATUS_STYLE_CONFIG: Record<EvaluationStatus | 'SPONSORED', MarkerStyleTokens> = {
   IDEAL: {
     badgeClass: 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-white',
     dotClass: 'bg-emerald-400',

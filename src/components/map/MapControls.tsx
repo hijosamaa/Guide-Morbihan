@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Plus, Minus, Compass, Navigation } from 'lucide-react';
+import { twMerge } from 'tailwind-merge';
 
 export interface MapControlsProps {
   onZoomIn: () => void;
@@ -22,7 +23,7 @@ export function MapControls({
 }: MapControlsProps) {
   return (
     <div
-      className={`absolute right-4 bottom-8 flex flex-col gap-2 z-10 ${className}`}
+      className={twMerge('absolute right-4 bottom-8 flex flex-col gap-2 z-10', className)}
       role="toolbar"
       aria-label="Contrôles de la carte"
     >

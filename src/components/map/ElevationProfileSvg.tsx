@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useId } from 'react';
 import { calculateElevationScales, findNearestElevationPoint, estimateHikingDuration } from '@/lib/map-utils';
 import type { ElevationPoint } from '@/lib/types/map';
 
@@ -37,6 +37,7 @@ export function ElevationProfileSvg({
   onHoverPoint,
   className = '',
 }: ElevationProfileSvgProps) {
+  const gradientId = useId();
   const [activePoint, setActivePoint] = useState<ElevationPoint | null>(null);
   const [activeX, setActiveX] = useState<number | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -142,22 +143,26 @@ export function ElevationProfileSvg({
           className="w-full h-auto cursor-crosshair touch-none"
           role="img"
           aria-label="Graphique d'élévation altimétrique"
+          onPointerDown={(e) => handlePointer(e.clientX)}
           onPointerMove={(e) => handlePointer(e.clientX)}
           onPointerLeave={handlePointerLeave}
+          onTouchStart={(e) => {
+            if (e.touches[0]) handlePointer(e.touches[0].clientX);
+          }}
           onTouchMove={(e) => {
             if (e.touches[0]) handlePointer(e.touches[0].clientX);
           }}
           onTouchEnd={handlePointerLeave}
         >
           <defs>
-            <linearGradient id="elevation-gradient" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#0284c7" stopOpacity="0.3" />
               <stop offset="100%" stopColor="#0284c7" stopOpacity="0.02" />
             </linearGradient>
           </defs>
 
           {/* Area fill */}
-          <path d={scales.pathArea} fill="url(#elevation-gradient)" />
+          <path d={scales.pathArea} fill={`url(#${gradientId})`} />
 
           {/* Ridge line */}
           <path d={scales.pathLine} fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />

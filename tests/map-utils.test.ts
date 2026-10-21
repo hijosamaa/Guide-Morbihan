@@ -88,6 +88,12 @@ test('estimateHikingDuration calculates duration accurately with FFRandonnee for
   // Minute rollover verification (e.g. 59.7 min -> 1h00)
   const res3 = estimateHikingDuration(3.99, 0);
   assert.ok(res3.formatted.includes('h'));
+
+  // Defensive clamping on negative values
+  const resNegative = estimateHikingDuration(-5, -50);
+  assert.equal(resNegative.hours, 0);
+  assert.equal(resNegative.minutes, 0);
+  assert.equal(resNegative.formatted, '0h00');
 });
 
 test('isPointInBounds correctly checks coordinate inclusion', () => {

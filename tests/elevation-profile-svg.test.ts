@@ -25,7 +25,7 @@ test('ElevationProfileSvg renders valid SVG structure and header stats', () => {
   assert.ok(html.includes('<svg'));
   assert.ok(html.includes('viewBox="0 0 800 160"'));
   assert.ok(html.includes('linearGradient'));
-  assert.ok(html.includes('id="elevation-gradient"'));
+  assert.ok(html.includes('fill="url(#'));
 
   // Header metrics
   assert.ok(html.includes('5 km') || html.includes('5.0 km'));

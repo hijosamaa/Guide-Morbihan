@@ -136,7 +136,7 @@ export function estimateHikingDuration(
   distanceKm: number,
   elevationGainM: number
 ): { hours: number; minutes: number; formatted: string } {
-  const flatHours = distanceKm / 4.0;
+  const flatHours = Math.max(0, distanceKm) / 4.0;
   const elevationHours = Math.max(0, elevationGainM) / 300.0;
   const totalHoursDec = flatHours + elevationHours;
 
