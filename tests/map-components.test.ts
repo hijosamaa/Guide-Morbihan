@@ -61,6 +61,8 @@ test('GpxTrackViewer renders map container and elevation profile section', () =>
   assert.ok(html.includes('<div'));
   assert.ok(html.includes('<svg'));
   assert.ok(html.includes('1.5 km'));
+  assert.ok(html.includes('role="region"'));
+  assert.ok(html.includes('aria-label="Tracé cartographique de randonnée"'));
 });
 
 test('GolfeMap renders without controls when showControls is false', () => {

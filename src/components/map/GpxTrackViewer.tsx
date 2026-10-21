@@ -45,6 +45,8 @@ export function GpxTrackViewer({
       attributionControl: false,
     });
 
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+
     map.on('load', () => {
       // Add track GeoJSON
       map.addSource('gpx-track', {
@@ -115,7 +117,23 @@ export function GpxTrackViewer({
 
     mapInstanceRef.current = map;
 
+    // Resize observer
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        map.resize();
+      });
+      resizeObserver.observe(mapContainerRef.current);
+    }
+
     return () => {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      if (trackPinMarkerRef.current) {
+        trackPinMarkerRef.current.remove();
+        trackPinMarkerRef.current = null;
+      }
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -137,7 +155,11 @@ export function GpxTrackViewer({
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       {title && <h3 className="font-semibold text-slate-900 text-base">{title}</h3>}
-      <div className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden shadow-sm border border-slate-100">
+      <div
+        className="relative w-full h-72 sm:h-80 rounded-2xl overflow-hidden shadow-sm border border-slate-100"
+        role="region"
+        aria-label={title ? `Tracé cartographique : ${title}` : 'Tracé cartographique de randonnée'}
+      >
         <div ref={mapContainerRef} className="w-full h-full" />
       </div>
       <ElevationProfileSvg

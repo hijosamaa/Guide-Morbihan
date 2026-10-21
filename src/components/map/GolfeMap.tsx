@@ -40,6 +40,8 @@ export function GolfeMap({
   placesRef.current = places;
   const onBoundsChangeRef = useRef(onBoundsChange);
   onBoundsChangeRef.current = onBoundsChange;
+  const onSelectPlaceRef = useRef(onSelectPlace);
+  onSelectPlaceRef.current = onSelectPlace;
 
   // Initialize Map
   useEffect(() => {
@@ -134,7 +136,7 @@ export function GolfeMap({
       }
 
       const el = createPlaceMarkerElement(place, isSelected, (clickedPlace) => {
-        if (onSelectPlace) onSelectPlace(clickedPlace);
+        if (onSelectPlaceRef.current) onSelectPlaceRef.current(clickedPlace);
       });
 
       const marker = new maplibregl.Marker({ element: el })
@@ -143,7 +145,7 @@ export function GolfeMap({
 
       markersRef.current.set(place.id, marker);
     });
-  }, [places, selectedPlaceId, onSelectPlace]);
+  }, [places, selectedPlaceId]);
 
   // Controls Handlers
   const handleZoomIn = useCallback(() => {
