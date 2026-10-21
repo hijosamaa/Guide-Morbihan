@@ -1,6 +1,10 @@
+import crypto from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { syncWeatherSnapshots } from '../../../../lib/open-meteo';
 import { syncOsmData } from '../../../../lib/overpass';
+
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 /**
  * Interface pour l'injection optionnelle de dépendances de synchronisation (notamment pour les tests unitaires).
@@ -8,6 +12,16 @@ import { syncOsmData } from '../../../../lib/overpass';
 export interface SyncDependencies {
   weatherSync?: () => Promise<{ success: boolean; [key: string]: unknown }>;
   osmSync?: () => Promise<{ success: boolean; [key: string]: unknown }>;
+}
+
+/**
+ * Compare deux chaînes en temps constant via SHA-256 pour éviter les attaques temporelles (timing attacks).
+ */
+function safeCompare(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const hashA = crypto.createHash('sha256').update(a).digest();
+  const hashB = crypto.createHash('sha256').update(b).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
 }
 
 /**
@@ -27,12 +41,12 @@ function isAuthorized(request: Request): boolean {
   const authHeader = request.headers.get('authorization');
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
-    if (token === secret) return true;
+    if (safeCompare(token, secret)) return true;
   }
 
   const url = new URL(request.url, 'http://localhost');
   const queryToken = url.searchParams.get('token');
-  if (queryToken && queryToken === secret) {
+  if (queryToken && safeCompare(queryToken, secret)) {
     return true;
   }
 
@@ -46,7 +60,7 @@ function isAuthorized(request: Request): boolean {
  * @param deps Dépendances injectées (facultatif, utilisé principalement par les tests)
  * @returns NextResponse contenant le statut d'exécution et les détails des jobs
  */
-export async function handleSync(request: Request, deps?: SyncDependencies) {
+export async function handleSync(request: Request, deps?: SyncDependencies): Promise<NextResponse> {
   if (!isAuthorized(request)) {
     return NextResponse.json(
       { error: 'Unauthorized: Invalid or missing cron secret' },
@@ -65,15 +79,31 @@ export async function handleSync(request: Request, deps?: SyncDependencies) {
   const osmSync = deps?.osmSync ?? syncOsmData;
 
   if (job === 'weather' || job === 'all') {
-    const weatherReport = await weatherSync();
-    results.weather = weatherReport;
-    if (!weatherReport.success) globalSuccess = false;
+    try {
+      const weatherReport = await weatherSync();
+      results.weather = weatherReport;
+      if (!weatherReport.success) globalSuccess = false;
+    } catch (err) {
+      globalSuccess = false;
+      results.weather = {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
   }
 
   if (job === 'osm' || job === 'all') {
-    const osmReport = await osmSync();
-    results.osm = osmReport;
-    if (!osmReport.success) globalSuccess = false;
+    try {
+      const osmReport = await osmSync();
+      results.osm = osmReport;
+      if (!osmReport.success) globalSuccess = false;
+    } catch (err) {
+      globalSuccess = false;
+      results.osm = {
+        success: false,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
   }
 
   const durationMs = Date.now() - startTime;
@@ -93,13 +123,13 @@ export async function handleSync(request: Request, deps?: SyncDependencies) {
 /**
  * Route GET /api/cron/sync
  */
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<NextResponse> {
   return handleSync(request);
 }
 
 /**
  * Route POST /api/cron/sync
  */
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   return handleSync(request);
 }

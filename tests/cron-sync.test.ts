@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { GET, POST, handleSync } from '../src/app/api/cron/sync/route.js';
+import { GET, POST, handleSync, dynamic, maxDuration } from '../src/app/api/cron/sync/route.js';
+
+test('route config exports dynamic=force-dynamic and maxDuration=60', () => {
+  assert.equal(dynamic, 'force-dynamic');
+  assert.equal(maxDuration, 60);
+});
 
 test('GET /api/cron/sync returns 401 Unauthorized when Bearer token is missing', async () => {
   process.env.CRON_SECRET = 'test-secret-token-123';
@@ -163,4 +168,29 @@ test('handleSync returns 207 Multi-Status when a job reports partial failure', a
   assert.equal(data.success, false);
   assert.ok(data.jobs.weather);
   assert.ok(data.jobs.osm);
+});
+
+test('handleSync isolates unexpected exception in sub-job and returns 207 Multi-Status', async () => {
+  process.env.CRON_SECRET = 'test-secret-token-123';
+
+  const mockDeps = {
+    weatherSync: async () => {
+      throw new Error('Fatal network timeout during Open-Meteo fetch');
+    },
+    osmSync: async () => {
+      return { success: true, totalParsed: 10, slipwaysUpserted: 2, amenitiesUpserted: 8, errors: [] };
+    },
+  };
+
+  const req = new Request('http://localhost:3000/api/cron/sync?job=all', {
+    headers: { Authorization: 'Bearer test-secret-token-123' },
+  });
+
+  const res = await handleSync(req, mockDeps);
+  assert.equal(res.status, 207);
+  const data = await res.json();
+  assert.equal(data.success, false);
+  assert.equal(data.jobs.weather.success, false);
+  assert.equal(data.jobs.weather.error, 'Fatal network timeout during Open-Meteo fetch');
+  assert.equal(data.jobs.osm.success, true);
 });
