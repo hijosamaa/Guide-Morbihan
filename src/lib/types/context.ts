@@ -1,6 +1,7 @@
 export type TidalPhase = 'FLOOD' | 'EBB' | 'SLACK_HIGH' | 'SLACK_LOW';
 export type PassageStatusKind = 'OPEN' | 'CLOSING_SOON' | 'CLOSED' | 'OPENING_SOON';
 export type ContextBadge = 'IDEAL' | 'WARNING' | 'UNSUITABLE';
+export type EvaluationStatus = 'IDEAL' | 'WARNING' | 'DISCOURAGED';
 export type WindCardinal = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
 
 export interface TidePoint {
