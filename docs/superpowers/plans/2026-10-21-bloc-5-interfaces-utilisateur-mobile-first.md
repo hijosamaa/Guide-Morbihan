@@ -14,19 +14,23 @@
 
 - **Aucun bandeau fixe invasif :** Utilisation exclusive de la capsule flottante minimaliste (`FloatingContextPill.tsx`) pour préserver $100\%$ de la hauteur utile de la carte.
 - **Berder & Tascon juste-à-temps :** N'apparaissent sous forme d'alerte que si fermeture imminente ($\le 45\text{ min}$) ou consultation du secteur concerné.
-- **Bottom Sheet non-modale :** `vaul` configuré avec `modal={false}` et `dismissible={false}` (paliers `['140px', 0.5, 0.92]`), permettant de manipuler la carte WebGL en arrière-plan sans blocage de pointeur.
-- **Camera Padding dynamique :** Décalage de la caméra MapLibre via `cameraPadding.bottom = activeSnapHeight` pour éviter d'occulter le marqueur sélectionné sous la sheet à $50\%$.
+- **Adaptateur Nuqs racine obligatoire :** `src/app/layout.tsx` doit envelopper `{children}` avec `<NuqsAdapter>` pour éviter le crash `NUQS-404` en Next.js 15.
+- **Désactivation du sticky hover :** `tailwind.config.ts` doit activer `future: { hoverOnlyWhenSupported: true }`.
+- **Bottom Sheet non-modale :** `vaul` configuré avec `modal={false}` et `dismissible={false}` (paliers `['140px', 0.5, 0.92]`). `Drawer.Content` porte la classe `lg:hidden` pour neutraliser sa téléportation dans le body sur desktop.
+- **Camera Padding dynamique :** Décalage de la caméra MapLibre via `cameraPadding.bottom = activeSnapHeight` connecté au state de la sheet pour éviter d'occulter le marqueur sélectionné sous la sheet à $50\%$.
 - **Zéro latence réseau sur les filtres :** Mises à jour d'URL $100\%$ client en `shallow: true` via `nuqs` couplé à `useTransition` de React 19.
 - **Micro-interactions :** Durées $< 220\text{ ms}$, pas de `transition: all`, pas d'animation depuis `scale(0)`, feedback instantané sur contact tactile (`active:scale-[0.96-0.98]`).
-- **Lisibilité plein soleil :** Contraste renforcé ($> 8.5:1$ à $11:1$, WCAG AAA) sur les badges et les données critiques ; cibles tactiles $\ge 44\text{-}48\text{ px}$.
+- **Lisibilité plein soleil :** Contraste renforcé ($> 8.5:1$ à $11:1$, WCAG AAA) sur les badges et les données critiques ; cibles tactiles $\ge 48\text{ px}$.
 - **Tests exécutables via `npm test` :** `tsx --test tests/**/*.test.ts`.
 
 ---
 
-### Task 1: Installation de `vaul` & `nuqs`, Schéma d'URL et Hook de Filtrage Client
+### Task 1: Installation de `vaul` & `nuqs`, Configuration Racine (`NuqsAdapter`), Schéma d'URL et Hook de Filtrage Client
 
 **Files:**
 - Modify: `package.json`
+- Modify: `src/app/layout.tsx`
+- Modify: `tailwind.config.ts`
 - Create: `src/lib/search-params.ts`
 - Create: `src/lib/hooks/useFilteredPlaces.ts`
 - Test: `tests/search-params-filter.test.ts`
@@ -34,12 +38,60 @@
 **Interfaces:**
 - Produces: `filterParsers`, `searchParamsCache` depuis `src/lib/search-params.ts`.
 - Produces: Hook `useFilteredPlaces(places, filters, currentWeather, currentTide)` retournant `filteredPlaces`.
+- Modifies: `src/app/layout.tsx` encapsulant `{children}` dans `<NuqsAdapter>`.
+- Modifies: `tailwind.config.ts` avec `future: { hoverOnlyWhenSupported: true }`.
 
 - [ ] **Step 1: Installer `vaul` et `nuqs` dans `package.json`**
 
 Exécuter la commande d'installation :
 ```bash
 npm install vaul@^1.1.2 nuqs@^2.3.2
+```
+
+- [ ] **Step 2: Configurer `<NuqsAdapter>` dans `src/app/layout.tsx` et `hoverOnlyWhenSupported` dans `tailwind.config.ts`**
+
+Mettre à jour `src/app/layout.tsx` :
+```tsx
+import type { Metadata, Viewport } from 'next';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+};
+
+export const metadata: Metadata = {
+  title: 'Le Copilote Contextuel du Golfe du Morbihan',
+  description: 'Moteur de décision touristique en temps réel : marées, météo et passages submersibles.',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="fr">
+      <body className="min-h-screen antialiased bg-slate-50 text-slate-900">
+        <NuqsAdapter>{children}</NuqsAdapter>
+      </body>
+    </html>
+  );
+}
+```
+
+Dans `tailwind.config.ts`, ajouter l'option :
+```typescript
+future: {
+  hoverOnlyWhenSupported: true,
+},
 ```
 
 - [ ] **Step 2: Écrire le test unitaire pour le filtrage client et les parseurs de filtres**
@@ -459,21 +511,39 @@ export function PlaceCard({
     return (
       <article
         id={`spot-card-${place.id}`}
+        role="button"
+        tabIndex={0}
         onClick={() => onSelect?.(place)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect?.(place);
+          }
+        }}
         className={twMerge(
           clsx(
-            'group flex flex-col rounded-2xl bg-white border border-slate-200/90 shadow-sm overflow-hidden cursor-pointer transition-all duration-140 active:scale-[0.985] text-left select-none',
+            'group flex flex-col rounded-2xl bg-white border border-slate-200/90 shadow-sm overflow-hidden cursor-pointer transition-transform duration-100 ease-out active:scale-[0.985] text-left select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
             isSelected && 'ring-2 ring-emerald-500 shadow-md',
             className
           )
         )}
       >
         <div className="relative aspect-video w-full bg-slate-100 flex items-center justify-center overflow-hidden">
-          {/* Placeholder visuel ou image réelle */}
+          {place.imageUrl ? (
+            <img
+              src={place.imageUrl}
+              alt={place.name}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+              <span className="text-4xl select-none" aria-hidden="true">
+                {place.category === 'BEACH' ? '🏖️' : place.category === 'TRAIL' ? '🥾' : '🌊'}
+              </span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent z-10" />
-          <span className="text-4xl select-none">
-            {place.category === 'BEACH' ? '🏖️' : place.category === 'TRAIL' ? '🥾' : '🌊'}
-          </span>
           <div className="absolute top-3 right-3 z-20">
             <ContextBadge status={place.status} customLabel={place.label} />
           </div>
@@ -511,14 +581,25 @@ export function PlaceCard({
       }}
       className={twMerge(
         clsx(
-          'flex items-center gap-3.5 p-3 rounded-xl bg-white border border-slate-200/80 shadow-sm cursor-pointer transition-all duration-120 active:scale-[0.98] select-none text-left touch-manipulation',
+          'flex items-center gap-3.5 p-3 rounded-xl bg-white border border-slate-200/80 shadow-sm cursor-pointer transition-transform duration-100 ease-out active:scale-[0.98] select-none text-left touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2',
           isSelected && 'ring-2 ring-emerald-500 bg-emerald-50/25 border-emerald-300',
           className
         )
       )}
     >
-      <div className="w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 text-2xl select-none border border-slate-200/50">
-        {place.category === 'BEACH' ? '🏖️' : place.category === 'TRAIL' ? '🥾' : '🌊'}
+      <div className="relative w-20 h-20 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 overflow-hidden border border-slate-200/50">
+        {place.imageUrl ? (
+          <img
+            src={place.imageUrl}
+            alt={place.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <span className="text-2xl select-none" aria-hidden="true">
+            {place.category === 'BEACH' ? '🏖️' : place.category === 'TRAIL' ? '🥾' : '🌊'}
+          </span>
+        )}
       </div>
 
       <div className="flex-1 min-w-0 pr-1">
@@ -637,7 +718,7 @@ export function FilterPill({
       aria-pressed={isActive}
       className={twMerge(
         clsx(
-          'h-11 px-4 rounded-full text-sm font-semibold whitespace-nowrap flex items-center gap-2 border select-none transition-transform duration-100 active:scale-[0.96] touch-manipulation',
+          'h-12 px-4 rounded-full text-sm font-semibold whitespace-nowrap flex items-center gap-2 border select-none transition-transform duration-100 ease-out active:scale-[0.96] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2',
           isActive
             ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
             : 'bg-white/95 text-slate-800 border-slate-300 hover:border-slate-400 shadow-sm',
@@ -928,7 +1009,7 @@ export function FloatingContextPill({
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}
-        className="h-9 px-3.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-300/80 shadow-md flex items-center gap-2.5 text-xs font-semibold text-slate-800 transition-transform duration-100 active:scale-[0.97] touch-manipulation"
+        className="min-h-[48px] h-12 px-4 rounded-full bg-white/95 backdrop-blur-md border border-slate-300/80 shadow-md flex items-center gap-2.5 text-xs font-semibold text-slate-800 transition-transform duration-100 ease-out active:scale-[0.97] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
         aria-label="Conditions météo et marée"
       >
         <span className="flex items-center gap-1">
@@ -944,7 +1025,7 @@ export function FloatingContextPill({
 
       {/* Popover déplié en overlay translucide */}
       {isExpanded && (
-        <div className="mt-1 p-3.5 bg-slate-900 text-white text-xs rounded-2xl shadow-xl border border-slate-800 max-w-xs animate-in fade-in zoom-in-95 duration-140">
+        <div className="mt-1 p-3.5 bg-slate-900 text-white text-xs rounded-2xl shadow-xl border border-slate-800 max-w-xs transition-opacity transition-transform duration-120 ease-out origin-top-right">
           <p className="font-bold text-sm text-emerald-400">Marée & Vent en Direct</p>
           <p className="mt-1 text-slate-300 leading-relaxed">
             Données calculées en temps réel par la règle des 12e pour le Golfe du Morbihan.
@@ -1058,13 +1139,18 @@ export function useCameraOffset(
   useEffect(() => {
     if (!map || typeof window === 'undefined') return;
 
-    const padding = calculateCameraPadding(activeSnapPoint, window.innerHeight);
+    const updatePadding = () => {
+      const padding = calculateCameraPadding(activeSnapPoint, window.innerHeight);
+      map.easeTo({
+        padding,
+        duration: 250,
+        easing: (t) => 1 - Math.pow(1 - t, 3), // cubic ease-out
+      });
+    };
 
-    map.easeTo({
-      padding,
-      duration: 250,
-      easing: (t) => 1 - Math.pow(1 - t, 3), // cubic ease-out
-    });
+    updatePadding();
+    window.addEventListener('resize', updatePadding);
+    return () => window.removeEventListener('resize', updatePadding);
   }, [map, activeSnapPoint]);
 }
 ```
@@ -1086,6 +1172,8 @@ export interface MobileExplorerSheetProps {
   selectedPlaceId?: string | null;
   onSelectPlace?: (place: PlaceMarkerData) => void;
   isRaining?: boolean;
+  activeSnapPoint?: string | number | null;
+  onSnapChange?: (snap: string | number | null) => void;
 }
 
 export function MobileExplorerSheet({
@@ -1093,8 +1181,16 @@ export function MobileExplorerSheet({
   selectedPlaceId,
   onSelectPlace,
   isRaining = false,
+  activeSnapPoint,
+  onSnapChange,
 }: MobileExplorerSheetProps) {
-  const [snap, setSnap] = useState<string | number | null>('140px');
+  const [internalSnap, setInternalSnap] = useState<string | number | null>('140px');
+  const snap = activeSnapPoint !== undefined ? activeSnapPoint : internalSnap;
+
+  const handleSnapChange = (newSnap: string | number | null) => {
+    setInternalSnap(newSnap);
+    onSnapChange?.(newSnap);
+  };
 
   return (
     <Drawer.Root
@@ -1103,11 +1199,11 @@ export function MobileExplorerSheet({
       dismissible={false} // Reste toujours au minimum à 140px
       snapPoints={['140px', 0.5, 0.92]}
       activeSnapPoint={snap}
-      setActiveSnapPoint={setSnap}
+      setActiveSnapPoint={handleSnapChange}
     >
       <Drawer.Portal>
         <Drawer.Content
-          className="fixed bottom-0 left-0 right-0 z-30 flex flex-col rounded-t-[24px] bg-white/95 backdrop-blur-md shadow-2xl border-t border-slate-200/80 outline-none select-none transition-transform"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex flex-col rounded-t-[24px] bg-white/95 backdrop-blur-md shadow-2xl border-t border-slate-200/80 outline-none select-none"
           style={{ height: '92dvh' }}
         >
           {/* Poignée de manipulation physique */}
@@ -1133,7 +1229,7 @@ export function MobileExplorerSheet({
                 variant="compact"
                 isSelected={place.id === selectedPlaceId}
                 onSelect={(p) => {
-                  setSnap(0.5); // Ouvre à 50% au tap
+                  handleSnapChange(0.5); // Ouvre à 50% au tap
                   onSelectPlace?.(p);
                 }}
               />
@@ -1311,6 +1407,7 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
 
 export default function CartePage() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [activeSnapPoint, setActiveSnapPoint] = useState<string | number | null>('140px');
 
   return (
     <main className="relative w-full h-[100dvh] overflow-hidden flex flex-col lg:flex-row bg-slate-100">
@@ -1349,13 +1446,13 @@ export default function CartePage() {
       </section>
 
       {/* Bottom Sheet Mobile (< 1024px) */}
-      <div className="lg:hidden">
-        <MobileExplorerSheet
-          places={INITIAL_PLACES}
-          selectedPlaceId={selectedPlaceId}
-          onSelectPlace={(p) => setSelectedPlaceId(p.id)}
-        />
-      </div>
+      <MobileExplorerSheet
+        places={INITIAL_PLACES}
+        selectedPlaceId={selectedPlaceId}
+        onSelectPlace={(p) => setSelectedPlaceId(p.id)}
+        activeSnapPoint={activeSnapPoint}
+        onSnapChange={setActiveSnapPoint}
+      />
     </main>
   );
 }

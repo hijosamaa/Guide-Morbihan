@@ -60,7 +60,7 @@ src/
         └── useCameraOffset.ts               # Hook de calcul du décalage de caméra MapLibre
 ```
 
-### 2.2. Nouvelles Dépendances
+### 2.2. Nouvelles Dépendances & Configuration Racine
 
 ```json
 {
@@ -73,6 +73,8 @@ src/
 
 - **`vaul`** : Bibliothèque headless de Drawer créée par Emil Kowalski. Fournit les équations physiques d'Apple WWDC 2018 (amortissement critique, résistance élastique, détection d'inertie de relâchement, confinement de scroll interne). Compatible React 19 et Next.js 15.
 - **`nuqs`** : Gestionnaire de paramètres d'URL pour Next.js App Router avec support natif de `shallow: true` et `useTransition`.
+- **Intégration Racine Obligatoire (`src/app/layout.tsx`) :**  
+  Dans Next.js 15 App Router avec Nuqs v2, `{children}` doit impérativement être encapsulé dans le composant `<NuqsAdapter>` sous peine d'erreur d'exécution `NUQS-404`.
 
 ---
 
@@ -147,7 +149,7 @@ export const searchParamsCache = createSearchParamsCache(filterParsers);
 ```
 
 - **Météo adaptative :** Si la météo locale (Bloc 3) remonte de la pluie (`isRaining === true`), la pilule `🌧️ À l'abri de la pluie` s'injecte automatiquement en première position.
-- **Cible tactile :** Hauteur $44\text{ px}$, `padding-inline: 1rem`, `user-select: none`, `touch-action: manipulation`.
+- **Cible tactile :** Hauteur de **$48\text{ px}$** (`h-12 px-4` ou `min-h-[48px]`), `user-select: none`, `touch-action: manipulation`, avec anneau de focus clavier accessible `focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2`.
 - **Micro-interaction :** Réduction instantanée sur contact `:active { transform: scale(0.96); }` avec rebond rapide (durée $100\text{ ms}$, courbe `cubic-bezier(0.23, 1, 0.32, 1)`).
 - **Synchronisation Shallow :** Utilisation de `useQueryState(key, { shallow: true, history: 'replace' })` couplée à `useTransition` de React 19 pour éviter toute interruption d'animation lors du filtrage en mémoire.
 
@@ -158,19 +160,20 @@ export const searchParamsCache = createSearchParamsCache(filterParsers);
 ### 5.1. Variante Compacte (Mobile Bottom Sheet & Sidebar Desktop)
 Conçue pour un défilement rapide au pouce :
 - **Layout :** Flexbox horizontal, hauteur $96\text{ px}$.
-- **Miniature :** Bloc carré $80 \times 80\text{ px}$ à gauche (`rounded-xl overflow-hidden object-cover`).
+- **Miniature :** Bloc carré $80 \times 80\text{ px}$ à gauche avec composant `<Image>` Next.js (`width={80} height={80} sizes="80px" rounded-xl overflow-hidden object-cover`) et fallback dégradé SVG/icône anti-CLS.
 - **Zone descriptive :**
   - Nom du spot en gras (16px, `truncate`).
   - Ligne métadonnée : icône catégorie + commune + distance relative (`📍 2.3 km`).
   - Badge de statut contextuel compact.
 - **État Sélectionné :** Si le marqueur est actif sur la carte, la carte reçoit `ring-2 ring-emerald-500 bg-emerald-50/20 shadow-sm`.
-- **Comportement tactile :** `:active { transform: scale(0.98); }` en 120ms.
+- **Comportement tactile & accessibilité :** `:active { transform: scale(0.98); }` en 120ms, support clavier complet avec `role="button"`, `tabIndex={0}`, `onKeyDown` et anneau `focus-visible:ring-2 focus-visible:ring-emerald-500`.
 
 ### 5.2. Variante Riche (Dashboard Accueil & Grille Découverte)
 Format carte d'inspiration verticale :
-- **Image :** Ratio 16:9 (`rounded-2xl`) avec dégradé semi-transparent en base.
+- **Image :** Ratio 16:9 (`rounded-2xl`) avec `<Image fill sizes="(max-width: 640px) 100vw, 380px" className="object-cover" />` et dégradé semi-transparent en base.
 - **Badges superposés :** Catégorie en haut à gauche, badge contextuel en haut à droite.
 - **Corps :** Titre, description courte (2 lignes max `line-clamp-2`), statistiques (ex: distance, dénivelé pour sentiers), et bouton d'action d'itinéraire parking.
+- **Accessibilité :** `role="button"`, `tabIndex={0}`, `onKeyDown` (Enter/Space) et `focus-visible:ring-2 focus-visible:ring-emerald-500`.
 
 ### 5.3. `ContextBadge.tsx` : Tokens de Visibilité & Itération Esthétique
 
@@ -202,7 +205,7 @@ Format carte d'inspiration verticale :
 >
   <Drawer.Portal>
     <Drawer.Content
-      className="fixed bottom-0 left-0 right-0 z-30 flex flex-col rounded-t-[24px] bg-white/95 backdrop-blur-md shadow-2xl border-t border-slate-200/80 outline-none select-none"
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex flex-col rounded-t-[24px] bg-white/95 backdrop-blur-md shadow-2xl border-t border-slate-200/80 outline-none select-none"
       style={{ height: '92dvh' }}
     >
       {/* Poignée de drag */}
