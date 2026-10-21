@@ -1,4 +1,6 @@
 import type {
+  OfficialPassageWindow,
+  PassageStatus,
   TidalPhase,
   TidePoint,
   TideStatus,
@@ -158,5 +160,183 @@ export function getTideStatus(
     nextEvent,
     minutesToNextEvent,
     tidalRangeMeters,
+  };
+}
+
+export interface PassageEvaluationOptions {
+  officialWindows?: OfficialPassageWindow[];
+  tideEvents?: TidePoint[];
+  harbor?: 'PORT_NAVALO' | 'VANNES';
+}
+
+const PASSAGE_CONFIGS: Record<
+  string,
+  {
+    name: string;
+    defaultHarbor: 'PORT_NAVALO' | 'VANNES';
+    maxHeightMeters: number;
+    hoursAroundLow: number;
+    hazardNoticeFlood?: string;
+  }
+> = {
+  'passage-ile-de-berder': {
+    name: "Chaussée de l'Île de Berder",
+    defaultHarbor: 'VANNES',
+    maxHeightMeters: 1.4,
+    hoursAroundLow: 2,
+    hazardNoticeFlood:
+      'Attention : violent courant de la Jument au flot. Ne traversez sous aucun prétexte avec de l’eau sur la chaussée.',
+  },
+  'passage-ile-tascon': {
+    name: "Passage de l'Île Tascon",
+    defaultHarbor: 'VANNES',
+    maxHeightMeters: 1.5,
+    hoursAroundLow: 2,
+    hazardNoticeFlood:
+      'Attention : marée montante rapide sur les vasières. Respectez les créneaux au sec.',
+  },
+};
+
+/**
+ * Évalue l'état de praticabilité d'un passage submersible (Berder, Tascon).
+ * Priorité absolue aux créneaux officiels, avec calcul hydrographique de secours.
+ */
+export function evaluatePassageStatus(
+  passageSlug: string,
+  timestamp: Date,
+  options: PassageEvaluationOptions = {}
+): PassageStatus {
+  const config = PASSAGE_CONFIGS[passageSlug] ?? {
+    name: passageSlug,
+    defaultHarbor: 'VANNES' as const,
+    maxHeightMeters: 1.4,
+    hoursAroundLow: 2,
+  };
+
+  const targetTime = timestamp.getTime();
+
+  // 1. Recherche d'un créneau officiel englobant ou proche (dans les 12h)
+  if (options.officialWindows && options.officialWindows.length > 0) {
+    const matchingWindow =
+      options.officialWindows.find(
+        (w) =>
+          w.passageSlug === passageSlug &&
+          targetTime >= w.openAt.getTime() &&
+          targetTime <= w.closeAt.getTime()
+      ) ??
+      options.officialWindows
+        .filter((w) => w.passageSlug === passageSlug)
+        .sort(
+          (a, b) =>
+            Math.min(
+              Math.abs(targetTime - a.openAt.getTime()),
+              Math.abs(targetTime - a.closeAt.getTime())
+            ) -
+            Math.min(
+              Math.abs(targetTime - b.openAt.getTime()),
+              Math.abs(targetTime - b.closeAt.getTime())
+            )
+        )
+        .find(
+          (w) => Math.abs(targetTime - w.openAt.getTime()) <= 12 * 3600 * 1000
+        );
+
+    if (matchingWindow) {
+      const openTime = matchingWindow.openAt.getTime();
+      const closeTime = matchingWindow.closeAt.getTime();
+      const isOpen = targetTime >= openTime && targetTime <= closeTime;
+
+      let status: 'OPEN' | 'CLOSING_SOON' | 'CLOSED' | 'OPENING_SOON';
+      let minutesRemaining: number;
+
+      if (isOpen) {
+        minutesRemaining = Math.max(0, Math.round((closeTime - targetTime) / 60000));
+        status = minutesRemaining <= 30 ? 'CLOSING_SOON' : 'OPEN';
+      } else if (targetTime < openTime) {
+        minutesRemaining = Math.max(0, Math.round((openTime - targetTime) / 60000));
+        status = minutesRemaining <= 30 ? 'OPENING_SOON' : 'CLOSED';
+      } else {
+        minutesRemaining = 0;
+        status = 'CLOSED';
+      }
+
+      return {
+        slug: passageSlug,
+        name: config.name,
+        isOpen,
+        status,
+        minutesRemaining,
+        source: 'OFFICIAL',
+        window: {
+          start: matchingWindow.openAt,
+          end: matchingWindow.closeAt,
+        },
+        hazardNotice: config.hazardNoticeFlood,
+      };
+    }
+  }
+
+  // 2. Fallback hydrodynamique via marées
+  if (!options.tideEvents || options.tideEvents.length === 0) {
+    throw new Error(
+      `Cannot evaluate passage ${passageSlug}: neither official windows nor tide events provided.`
+    );
+  }
+
+  const harbor = options.harbor ?? config.defaultHarbor;
+  const tideStatus = getTideStatus(timestamp, harbor, options.tideEvents);
+
+  // Recherche de la basse mer la plus proche
+  const nearestLow =
+    tideStatus.previousEvent.eventType === 'LOW'
+      ? tideStatus.previousEvent
+      : tideStatus.nextEvent.eventType === 'LOW'
+      ? tideStatus.nextEvent
+      : options.tideEvents
+          .filter((e) => e.harbor === harbor && e.eventType === 'LOW')
+          .sort(
+            (a, b) =>
+              Math.abs(a.eventTimestamp.getTime() - targetTime) -
+              Math.abs(b.eventTimestamp.getTime() - targetTime)
+          )[0];
+
+  if (!nearestLow) {
+    throw new Error(`No low tide event found for harbor ${harbor}.`);
+  }
+
+  const lowTime = nearestLow.eventTimestamp.getTime();
+  const halfWindowMs = config.hoursAroundLow * 3600 * 1000;
+  const startTime = new Date(lowTime - halfWindowMs);
+  const endTime = new Date(lowTime + halfWindowMs);
+
+  const isOpen = targetTime >= startTime.getTime() && targetTime <= endTime.getTime();
+  let status: 'OPEN' | 'CLOSING_SOON' | 'CLOSED' | 'OPENING_SOON';
+  let minutesRemaining: number;
+
+  if (isOpen) {
+    minutesRemaining = Math.max(0, Math.round((endTime.getTime() - targetTime) / 60000));
+    status = minutesRemaining <= 30 ? 'CLOSING_SOON' : 'OPEN';
+  } else if (targetTime < startTime.getTime()) {
+    minutesRemaining = Math.max(0, Math.round((startTime.getTime() - targetTime) / 60000));
+    status = minutesRemaining <= 30 ? 'OPENING_SOON' : 'CLOSED';
+  } else {
+    minutesRemaining = 0;
+    status = 'CLOSED';
+  }
+
+  const isFloodOrRising = tideStatus.phase === 'FLOOD' || targetTime >= lowTime;
+
+  return {
+    slug: passageSlug,
+    name: config.name,
+    isOpen,
+    status,
+    minutesRemaining,
+    source: 'CALCULATED_FALLBACK',
+    window: {
+      start: startTime,
+      end: endTime,
+    },
+    hazardNotice: isFloodOrRising ? config.hazardNoticeFlood : undefined,
   };
 }

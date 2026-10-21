@@ -5,8 +5,9 @@ import {
   interpolateWaterHeight,
   resolveHarborForCommune,
   getTideStatus,
+  evaluatePassageStatus,
 } from '../src/lib/tide-engine';
-import type { TidePoint } from '../src/lib/types/context';
+import type { OfficialPassageWindow, TidePoint } from '../src/lib/types/context';
 
 test('Rule of twelfths fractional checkpoints', () => {
   // Check exact 1/12, 3/12, 6/12, 9/12, 11/12, 12/12
@@ -120,3 +121,73 @@ test('getTideStatus returns complete phase and state', () => {
     getTideStatus(new Date('2026-10-21T14:00:00Z'), 'VANNES', events);
   }, /Insufficient tide events/);
 });
+
+test('Berder passage prioritizes official window when provided', () => {
+  const officialWindows: OfficialPassageWindow[] = [
+    {
+      passageSlug: 'passage-ile-de-berder',
+      openAt: new Date('2026-10-21T09:30:00Z'),
+      closeAt: new Date('2026-10-21T13:30:00Z'),
+      source: 'MAIRIE_LARMOR_BADEN',
+    },
+  ];
+
+  // At 11:00: open with official source
+  const statusOpen = evaluatePassageStatus('passage-ile-de-berder', new Date('2026-10-21T11:00:00Z'), {
+    officialWindows,
+  });
+  assert.equal(statusOpen.isOpen, true);
+  assert.equal(statusOpen.status, 'OPEN');
+  assert.equal(statusOpen.source, 'OFFICIAL');
+  assert.equal(statusOpen.minutesRemaining, 150); // 2h30 before 13:30
+
+  // At 13:15: closing soon (< 30 min before 13:30)
+  const statusClosing = evaluatePassageStatus('passage-ile-de-berder', new Date('2026-10-21T13:15:00Z'), {
+    officialWindows,
+  });
+  assert.equal(statusClosing.isOpen, true);
+  assert.equal(statusClosing.status, 'CLOSING_SOON');
+  assert.equal(statusClosing.minutesRemaining, 15);
+
+  // At 14:00: closed
+  const statusClosed = evaluatePassageStatus('passage-ile-de-berder', new Date('2026-10-21T14:00:00Z'), {
+    officialWindows,
+  });
+  assert.equal(statusClosed.isOpen, false);
+  assert.equal(statusClosed.status, 'CLOSED');
+});
+
+test('Berder passage falls back to calculation when no official window provided', () => {
+  const tideEvents: TidePoint[] = [
+    {
+      harbor: 'VANNES',
+      eventType: 'HIGH',
+      eventTimestamp: new Date('2026-10-21T06:55:00Z'),
+      heightMeters: 4.25,
+      coefficient: 74,
+    },
+    {
+      harbor: 'VANNES',
+      eventType: 'LOW',
+      eventTimestamp: new Date('2026-10-21T13:20:00Z'),
+      heightMeters: 1.45,
+      coefficient: null,
+    },
+    {
+      harbor: 'VANNES',
+      eventType: 'HIGH',
+      eventTimestamp: new Date('2026-10-21T19:25:00Z'),
+      heightMeters: 4.4,
+      coefficient: 78,
+    },
+  ];
+
+  // At 13:20 (exact low tide): open via fallback
+  const statusFallback = evaluatePassageStatus('passage-ile-de-berder', new Date('2026-10-21T13:20:00Z'), {
+    tideEvents,
+  });
+  assert.equal(statusFallback.isOpen, true);
+  assert.equal(statusFallback.source, 'CALCULATED_FALLBACK');
+  assert.equal(statusFallback.hazardNotice !== undefined, true);
+});
+
