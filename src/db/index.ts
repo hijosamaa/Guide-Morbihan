@@ -1,0 +1,36 @@
+import { drizzle } from 'drizzle-orm/node-postgres';
+import pg from 'pg';
+import * as schema from './schema';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.local' });
+dotenv.config();
+
+const connectionString = process.env.DATABASE_URL;
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __dbPool: pg.Pool | undefined;
+}
+
+const pool =
+  globalThis.__dbPool ??
+  new pg.Pool({
+    connectionString,
+    ssl: connectionString?.includes('supabase.co') || connectionString?.includes('pooler.supabase.com')
+      ? { rejectUnauthorized: false }
+      : undefined,
+    max: 10,
+    idleTimeoutMillis: 30000,
+  });
+
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle database client', err);
+});
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.__dbPool = pool;
+}
+
+export const db = drizzle(pool, { schema });
+export { pool };
