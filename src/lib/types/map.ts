@@ -11,6 +11,7 @@ export interface PlaceMarkerData {
   isSponsored?: boolean;
   score?: number;
   label?: string;
+  imageUrl?: string;
 }
 
 export interface MapViewportBounds {
