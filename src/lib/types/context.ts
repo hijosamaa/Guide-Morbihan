@@ -70,3 +70,28 @@ export interface ContextEvaluationResult {
   };
   passageContext?: PassageStatus;
 }
+
+export interface PhotoItem {
+  url: string;
+  caption?: string;
+  credit?: string;
+  isCover?: boolean;
+}
+
+export interface PracticalInfo {
+  recommendedDurationMinutes?: number;
+  pricing?: string;
+  amenities?: ('toilets' | 'water' | 'parking' | 'food' | 'picnic_table' | 'shade')[];
+  insiderTip?: string;
+  goodToKnow?: string;
+  bestSeason?: ('SPRING' | 'SUMMER' | 'AUTUMN' | 'WINTER')[];
+}
+
+export interface TideDetails {
+  highTideAdvantage?: string;
+  lowTideAdvantage?: string;
+  warningNote?: string;
+}
+
+export type PlaceSourceType = 'DATATOURISME' | 'CURATED' | 'MANUAL';
+

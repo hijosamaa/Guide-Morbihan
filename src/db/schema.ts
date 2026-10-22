@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   pgEnum,
 } from 'drizzle-orm/pg-core';
+import { PhotoItem, PracticalInfo, TideDetails, PlaceSourceType } from '../lib/types/context';
 
 // Énumérations métier
 export const categoryEnum = pgEnum('place_category', [
@@ -87,6 +88,10 @@ export const places = pgTable(
 
     // Médias & Monétisation
     coverImageUrl: text('cover_image_url'),
+    photoGallery: jsonb('photo_gallery').$type<PhotoItem[]>().default([]).notNull(),
+    practicalInfo: jsonb('practical_info').$type<PracticalInfo>(),
+    tideDetails: jsonb('tide_details').$type<TideDetails>(),
+    sourceType: varchar('source_type', { length: 50 }).$type<PlaceSourceType>().default('CURATED').notNull(),
     isSponsored: boolean('is_sponsored').default(false).notNull(),
     affiliateBookingUrl: text('affiliate_booking_url'),
     affiliateLabel: varchar('affiliate_label', { length: 100 }),
