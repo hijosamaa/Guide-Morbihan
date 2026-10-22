@@ -62,7 +62,7 @@ describe('Carte Hybrid Navigation & Expanding Sheet', () => {
     );
   });
 
-  it('renders back-to-spots button when selectedPlace is active', () => {
+  it('renders a single back-to-spots button without duplicate close button', () => {
     const html = renderToStaticMarkup(
       React.createElement(MobileExplorerSheet, {
         places: [dummyPlace],
@@ -72,8 +72,12 @@ describe('Carte Hybrid Navigation & Expanding Sheet', () => {
       })
     );
 
-    assert.ok(html.includes('Retour aux spots'), 'Must contain [← Retour aux spots] button');
-    assert.ok(html.includes('aria-label="Retour aux spots"'), 'Must have accessible label');
+    // Exactly one back button with aria-label="Retour aux spots"
+    const buttonMatches = html.match(/aria-label="Retour aux spots"/g) || [];
+    assert.equal(buttonMatches.length, 1, 'Must render exactly one [← Retour aux spots] button');
+    assert.ok(html.includes('← Retour aux spots'), 'Must contain button text');
+    // Ensure PlaceDetailView does not render a second conflicting close button
+    assert.ok(!html.includes('aria-label="Fermer la fiche"'), 'Must not render redundant internal close button');
   });
 
   it('renders list of places and filter bar when selectedPlace is null', () => {
@@ -111,6 +115,22 @@ describe('Carte Hybrid Navigation & Expanding Sheet', () => {
     assert.ok(html.includes('Île de Berder'), 'Must render selected spot Île de Berder');
     assert.ok(html.includes('Retour aux spots'), 'Must render back to spots button');
     assert.ok(html.includes('Larmor-Baden'), 'Must render commune for selected spot');
+  });
+
+  it('aligns slugs with curated spots, loading rich details for Suscinio and Berder', () => {
+    const html = renderToString(
+      React.createElement(
+        NuqsTestingAdapter,
+        {
+          searchParams: { spot: 'chateau-de-suscinio' },
+          children: React.createElement(CartePage),
+        }
+      )
+    );
+
+    // Should display rich curated info for Suscinio
+    assert.ok(html.includes('Château et Marais de Suscinio') || html.includes('Suscinio'));
+    assert.ok(html.includes('Sarzeau'), 'Must display Sarzeau commune from curated data');
   });
 
   it('initial loading: CartePage renders place list when no ?spot= is in URL', () => {
