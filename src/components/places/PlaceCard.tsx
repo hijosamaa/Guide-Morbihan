@@ -37,6 +37,7 @@ export function PlaceCard({
         id={`spot-card-${place.id}`}
         role="button"
         tabIndex={0}
+        aria-pressed={isSelected}
         onClick={() => onSelect?.(place)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -96,6 +97,7 @@ export function PlaceCard({
       id={`spot-card-${place.id}`}
       role="button"
       tabIndex={0}
+      aria-pressed={isSelected}
       onClick={() => onSelect?.(place)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {

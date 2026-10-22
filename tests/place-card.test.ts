@@ -60,6 +60,16 @@ test('PlaceCard renders compact variant with name and category', () => {
   assert.ok(html.includes('Plage &amp; Crique') || html.includes('Plage & Crique'));
   assert.ok(html.includes('role="button"'));
   assert.ok(html.includes('tabindex="0"'));
+  assert.ok(html.includes('aria-pressed="false"'));
+
+  const selectedHtml = renderToString(
+    React.createElement(PlaceCard, {
+      place: samplePlace,
+      variant: 'compact',
+      isSelected: true,
+    })
+  );
+  assert.ok(selectedHtml.includes('aria-pressed="true"'));
 });
 
 test('PlaceCard renders rich variant with image placeholder and details', () => {
@@ -74,6 +84,7 @@ test('PlaceCard renders rich variant with image placeholder and details', () => 
   assert.ok(html.includes('spot-card-spot-1'));
   assert.ok(html.includes('Golfe du Morbihan'));
   assert.ok(html.includes('ring-2 ring-emerald-500'));
+  assert.ok(html.includes('aria-pressed="true"'));
 });
 
 test('PlaceCard renders image when imageUrl is provided', () => {
@@ -102,8 +113,11 @@ test('PlaceCard renders image when imageUrl is provided', () => {
 test('PlaceCardSkeleton renders compact and rich skeletons', () => {
   const compactSkeleton = renderToString(React.createElement(PlaceCardSkeleton, { variant: 'compact' }));
   assert.ok(compactSkeleton.includes('animate-pulse'));
+  assert.ok(compactSkeleton.includes('rounded-xl'));
 
   const richSkeleton = renderToString(React.createElement(PlaceCardSkeleton, { variant: 'rich' }));
   assert.ok(richSkeleton.includes('animate-pulse'));
-  assert.ok(richSkeleton.includes('aspect-video'));
+  assert.ok(richSkeleton.includes('aspect-video bg-slate-200'));
+  assert.ok(richSkeleton.includes('p-4 flex flex-col flex-1'));
+  assert.ok(richSkeleton.includes('overflow-hidden'));
 });
