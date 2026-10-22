@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Guide Morbihan" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Tour de l'Île de Berder</name>
+    <desc>Boucle piétonne ombragée longeant le courant de la Jument</desc>
+  </metadata>
+  <trk>
+    <name>Boucle côtière de l'Île de Berder</name>
+    <trkseg>
+      <trkpt lat="47.5815" lon="-2.8890"><ele>1.5</ele></trkpt>
+      <trkpt lat="47.5810" lon="-2.8885"><ele>2.2</ele></trkpt>
+      <trkpt lat="47.5802" lon="-2.8876"><ele>3.8</ele></trkpt>
+      <trkpt lat="47.5795" lon="-2.8865"><ele>5.1</ele></trkpt>
+      <trkpt lat="47.5788" lon="-2.8858"><ele>6.4</ele></trkpt>
+      <trkpt lat="47.5779" lon="-2.8855"><ele>7.8</ele></trkpt>
+      <trkpt lat="47.5768" lon="-2.8858"><ele>8.5</ele></trkpt>
+      <trkpt lat="47.5755" lon="-2.8868"><ele>9.2</ele></trkpt>
+      <trkpt lat="47.5742" lon="-2.8878"><ele>10.6</ele></trkpt>
+      <trkpt lat="47.5732" lon="-2.8890"><ele>11.8</ele></trkpt>
+      <trkpt lat="47.5728" lon="-2.8905"><ele>10.4</ele></trkpt>
+      <trkpt lat="47.5735" lon="-2.8920"><ele>8.2</ele></trkpt>
+      <trkpt lat="47.5748" lon="-2.8932"><ele>7.1</ele></trkpt>
+      <trkpt lat="47.5762" lon="-2.8938"><ele>6.0</ele></trkpt>
+      <trkpt lat="47.5778" lon="-2.8935"><ele>5.2</ele></trkpt>
+      <trkpt lat="47.5792" lon="-2.8925"><ele>4.3</ele></trkpt>
+      <trkpt lat="47.5805" lon="-2.8912"><ele>3.1</ele></trkpt>
+      <trkpt lat="47.5812" lon="-2.8898"><ele>2.0</ele></trkpt>
+      <trkpt lat="47.5815" lon="-2.8890"><ele>1.5</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

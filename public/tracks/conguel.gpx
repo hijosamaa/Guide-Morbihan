@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Guide Morbihan" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Boucle de la Pointe du Conguel</name>
+    <desc>Extrémité sud de la presqu'île de Quiberon face au phare de la Teignouse</desc>
+  </metadata>
+  <trk>
+    <name>Pointe du Conguel</name>
+    <trkseg>
+      <trkpt lat="47.4720" lon="-3.0980"><ele>2.0</ele></trkpt>
+      <trkpt lat="47.4695" lon="-3.0950"><ele>4.5</ele></trkpt>
+      <trkpt lat="47.4670" lon="-3.0920"><ele>6.0</ele></trkpt>
+      <trkpt lat="47.4640" lon="-3.0880"><ele>7.5</ele></trkpt>
+      <trkpt lat="47.4615" lon="-3.0845"><ele>5.0</ele></trkpt>
+      <trkpt lat="47.4590" lon="-3.0810"><ele>3.5</ele></trkpt>
+      <trkpt lat="47.4605" lon="-3.0835"><ele>4.2</ele></trkpt>
+      <trkpt lat="47.4635" lon="-3.0875"><ele>6.8</ele></trkpt>
+      <trkpt lat="47.4665" lon="-3.0915"><ele>8.1</ele></trkpt>
+      <trkpt lat="47.4690" lon="-3.0960"><ele>5.4</ele></trkpt>
+      <trkpt lat="47.4720" lon="-3.0980"><ele>2.0</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>

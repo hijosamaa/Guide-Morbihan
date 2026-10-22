@@ -28,6 +28,7 @@ import type {
 import { ContextBadge } from './ContextBadge';
 import { PhotoGallery } from './PhotoGallery';
 import { ParkingDirectButton } from './ParkingDirectButton';
+import { PlaceTrailSection } from './PlaceTrailSection';
 
 export interface PlaceDetailViewProps {
   place: Place;
@@ -329,6 +330,19 @@ export function PlaceDetailView({
               </p>
             )}
           </section>
+        )}
+
+        {/* GPX Trail and elevation profile if applicable */}
+        {(place.category === 'TRAIL' ||
+          place.trailData ||
+          place.slug.includes('berder') ||
+          place.slug.includes('moines') ||
+          place.slug.includes('conguel')) && (
+          <PlaceTrailSection
+            placeSlug={place.slug}
+            trailName={place.name}
+            gpxUrl={(place.trailData as any)?.gpxUrl}
+          />
         )}
 
         {/* Direct Parking GPS Access */}
