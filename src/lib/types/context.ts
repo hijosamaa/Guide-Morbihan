@@ -1,8 +1,19 @@
+import type { ContextualRules } from '../../db/schema';
+
 export type TidalPhase = 'FLOOD' | 'EBB' | 'SLACK_HIGH' | 'SLACK_LOW';
 export type PassageStatusKind = 'OPEN' | 'CLOSING_SOON' | 'CLOSED' | 'OPENING_SOON';
 export type ContextBadge = 'IDEAL' | 'WARNING' | 'UNSUITABLE';
 export type EvaluationStatus = 'IDEAL' | 'WARNING' | 'DISCOURAGED';
 export type WindCardinal = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
+
+export type PlaceCategory =
+  | 'BEACH'
+  | 'TRAIL'
+  | 'TIDAL_PASSAGE'
+  | 'HERITAGE'
+  | 'GASTRONOMY'
+  | 'NAUTICAL'
+  | 'VIEWPOINT';
 
 export interface TidePoint {
   harbor: 'PORT_NAVALO' | 'VANNES';
@@ -55,9 +66,36 @@ export interface WeatherContext {
   isRaining: boolean;
 }
 
+export interface MarineWeatherContext {
+  tempCelsius: number;
+  windSpeedKnots: number;
+  windDirectionDeg: number;
+  windCardinal: WindCardinal;
+  isRaining: boolean;
+  sector?: string;
+  weatherCode?: number;
+  tideStatus?: {
+    harbor: 'PORT_NAVALO' | 'VANNES';
+    currentHeight?: number;
+    waterHeightMeters?: number;
+    phase?: TidalPhase | string;
+    state?: string;
+    progressPercent?: number;
+    nextTide?: { type: 'HIGH' | 'LOW'; time: Date; height: number };
+    previousTide?: { type: 'HIGH' | 'LOW'; time: Date; height: number };
+    coefficient?: number;
+    minutesToNextEvent?: number;
+    tidalRangeMeters?: number;
+    previousEvent?: TidePoint;
+    nextEvent?: TidePoint;
+  } | TideStatus;
+}
+
 export interface ContextEvaluationResult {
   placeSlug: string;
   badge: ContextBadge;
+  status: EvaluationStatus;
+  badgeLabel: string;
   score: number;
   titleReason: string;
   reasons: string[];
@@ -94,4 +132,34 @@ export interface TideDetails {
 }
 
 export type PlaceSourceType = 'DATATOURISME' | 'CURATED' | 'MANUAL';
+
+export interface Place {
+  id?: string;
+  externalId?: string | null;
+  slug: string;
+  name: string;
+  shortDescription?: string;
+  fullDescription?: string | null;
+  category: PlaceCategory | (string & {});
+  commune?: string;
+  communeSlug?: string;
+  sector?: string;
+  latitude?: number;
+  longitude?: number;
+  parkingLat?: number | null;
+  parkingLng?: number | null;
+  contextualRules: Omit<ContextualRules, 'shelteredFromWindDirections'> & {
+    shelteredFromWindDirections?: readonly WindCardinal[] | WindCardinal[];
+  };
+  trailData?: unknown;
+  coverImageUrl?: string | null;
+  photoGallery?: PhotoItem[];
+  practicalInfo?: PracticalInfo | null;
+  tideDetails?: TideDetails | null;
+  sourceType?: PlaceSourceType;
+  isSponsored?: boolean;
+  affiliateBookingUrl?: string | null;
+  affiliateLabel?: string | null;
+  updatedAt?: Date;
+}
 

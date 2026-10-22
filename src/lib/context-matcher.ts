@@ -2,7 +2,12 @@ import type { ContextualRules } from '../db/schema';
 import type {
   ContextBadge,
   ContextEvaluationResult,
+  EvaluationStatus,
+  MarineWeatherContext,
   PassageStatus,
+  Place,
+  PlaceCategory,
+  TidePoint,
   TideStatus,
   WeatherContext,
   WindCardinal,
@@ -11,8 +16,9 @@ import type {
 export interface PlaceWithContextRules {
   slug: string;
   name: string;
+  category?: PlaceCategory | (string & {});
   contextualRules: Omit<ContextualRules, 'shelteredFromWindDirections'> & {
-    shelteredFromWindDirections?: readonly WindCardinal[];
+    shelteredFromWindDirections?: readonly WindCardinal[] | WindCardinal[];
   };
   isSponsored?: boolean;
 }
@@ -21,21 +27,131 @@ export interface PlaceWithContextRules {
  * Évalue l'adéquation d'un lieu à l'instant T selon la marée, le vent et la météo.
  * Fonction 100% pure, exécutable sur serveur et client (isomorphe).
  *
- * @param place - Données du lieu avec ses règles contextuelles
+ * @param place - Données du lieu avec ses règles contextuelles et sa catégorie optionnelle
  * @param currentTime - Horodatage de l'évaluation
  * @param tideContext - État de la marée au port de référence
  * @param weatherContext - Conditions météorologiques locales (vent, pluie, etc.)
  * @param passageContext - État optionnel d'un passage submersible (Berder, Tascon...)
- * @returns Résultat d'évaluation comprenant badge, score (0-100), raison principale et détails
+ * @returns Résultat d'évaluation comprenant badge, statut, libellé contextualisé, score et détails
  */
 export function evaluatePlaceContext(
-  place: PlaceWithContextRules,
+  place: PlaceWithContextRules | Place,
   currentTime: Date,
   tideContext: TideStatus,
   weatherContext: WeatherContext,
   passageContext?: PassageStatus
+): ContextEvaluationResult;
+
+export function evaluatePlaceContext(
+  place: PlaceWithContextRules | Place,
+  context: MarineWeatherContext,
+  tidePredictions?: unknown
+): ContextEvaluationResult;
+
+export function evaluatePlaceContext(
+  place: PlaceWithContextRules | Place,
+  currentTimeOrContext: Date | MarineWeatherContext,
+  tideContextOrPredictions?: unknown,
+  weatherContextParam?: WeatherContext,
+  passageContextParam?: PassageStatus
 ): ContextEvaluationResult {
+  let currentTime: Date;
+  let tideContext: TideStatus;
+  let weatherContext: WeatherContext;
+  let passageContext: PassageStatus | undefined;
+
+  if (currentTimeOrContext instanceof Date) {
+    currentTime = currentTimeOrContext;
+    tideContext = tideContextOrPredictions as TideStatus;
+    weatherContext = weatherContextParam!;
+    passageContext = passageContextParam;
+  } else {
+    const marineCtx = currentTimeOrContext;
+    const rawTide = marineCtx.tideStatus as any;
+    const harbor = (rawTide?.harbor as 'PORT_NAVALO' | 'VANNES') || 'VANNES';
+    const now = rawTide?.timestamp ?? (rawTide?.nextTide?.time ?? new Date());
+    currentTime = now;
+
+    weatherContext = {
+      sector: marineCtx.sector || 'VANNES',
+      tempCelsius: marineCtx.tempCelsius,
+      windSpeedKnots: marineCtx.windSpeedKnots,
+      windDirectionDeg: marineCtx.windDirectionDeg,
+      windCardinal: marineCtx.windCardinal,
+      weatherCode: marineCtx.weatherCode ?? (marineCtx.isRaining ? 61 : 1),
+      isRaining: marineCtx.isRaining,
+    };
+
+    if (rawTide && rawTide.previousEvent && rawTide.nextEvent) {
+      tideContext = rawTide as TideStatus;
+    } else {
+      const currentHeight = rawTide?.currentHeight ?? rawTide?.waterHeightMeters ?? 2.0;
+      const phase = (rawTide?.phase as any) || 'FLOOD';
+      const coefficient = rawTide?.coefficient ?? 70;
+      const nextTide = rawTide?.nextTide;
+
+      let nextEvent: TidePoint;
+      let previousEvent: TidePoint;
+
+      if (nextTide) {
+        const nextTimeMs = nextTide.time.getTime();
+        nextEvent = {
+          harbor,
+          eventType: nextTide.type,
+          eventTimestamp: nextTide.time,
+          heightMeters: nextTide.height,
+          coefficient,
+        };
+        const prevType = nextTide.type === 'LOW' ? 'HIGH' : 'LOW';
+        const prevHeight = nextTide.type === 'LOW' ? 4.2 : 0.8;
+        previousEvent = {
+          harbor,
+          eventType: prevType,
+          eventTimestamp: new Date(nextTimeMs - 22320000), // 6.2 * 3600000
+          heightMeters: prevHeight,
+          coefficient,
+        };
+      } else {
+        const nowMs = now.getTime();
+        nextEvent = {
+          harbor,
+          eventType: 'HIGH',
+          eventTimestamp: new Date(nowMs + 10800000),
+          heightMeters: 4.2,
+          coefficient,
+        };
+        previousEvent = {
+          harbor,
+          eventType: 'LOW',
+          eventTimestamp: new Date(nowMs - 11520000),
+          heightMeters: 0.8,
+          coefficient,
+        };
+      }
+
+      tideContext = {
+        harbor,
+        timestamp: currentTime,
+        waterHeightMeters: currentHeight,
+        phase,
+        coefficient,
+        previousEvent,
+        nextEvent,
+        minutesToNextEvent: Math.max(0, Math.round((nextEvent.eventTimestamp.getTime() - currentTime.getTime()) / 60000)),
+        tidalRangeMeters: Math.abs(nextEvent.heightMeters - previousEvent.heightMeters),
+      };
+    }
+
+    passageContext = undefined;
+  }
+
   const rules = place.contextualRules;
+  const category = (place as { category?: string }).category;
+  const isHeritage = category === 'HERITAGE';
+  const isGastronomy = category === 'GASTRONOMY';
+  const isViewpoint = category === 'VIEWPOINT';
+  const isBeach = category === 'BEACH';
+
   const reasons: string[] = [];
   let score = 50;
   let forceBadge: ContextBadge | null = null;
@@ -64,7 +180,9 @@ export function evaluatePlaceContext(
 
       if (isHighTideNear) {
         score += 35;
-        primaryReason = 'Baignade idéale actuellement (marée haute)';
+        primaryReason = isBeach
+          ? 'Baignade idéale actuellement'
+          : 'Baignade idéale actuellement (marée haute)';
         reasons.push('Profondeur d’eau optimale pour la baignade.');
       } else if (isMidTide) {
         score += 10;
@@ -73,7 +191,9 @@ export function evaluatePlaceContext(
       } else {
         score -= 40;
         forceBadge = 'UNSUITABLE';
-        primaryReason = 'Baignade déconseillée actuellement (marée basse)';
+        primaryReason = isBeach
+          ? 'Basse mer : estran découvert'
+          : 'Baignade déconseillée actuellement (marée basse)';
         reasons.push('Estran découvert, présence de vase ou accès à l’eau difficile.');
       }
       break;
@@ -144,10 +264,27 @@ export function evaluatePlaceContext(
     case 'ALL_TIDES':
     default: {
       score += 20;
-      if (!primaryReason) {
-        primaryReason = 'Praticable à toute heure de marée';
+      if (isHeritage) {
+        if (!primaryReason) {
+          primaryReason = 'Visite conseillée';
+        }
+        reasons.push('Site culturel et patrimonial accessible en toute saison.');
+      } else if (isGastronomy) {
+        if (!primaryReason) {
+          primaryReason = 'Idéal pour une pause gourmande';
+        }
+        reasons.push('Pause gourmande accessible indépendamment de la marée.');
+      } else if (isViewpoint) {
+        if (!primaryReason) {
+          primaryReason = 'Vue dégagée';
+        }
+        reasons.push('Point de vue panoramique accessible à toute heure.');
+      } else {
+        if (!primaryReason) {
+          primaryReason = 'Praticable à toute heure de marée';
+        }
+        reasons.push('Lieu accessible indépendamment du niveau de la mer.');
       }
-      reasons.push('Lieu accessible indépendamment du niveau de la mer.');
       break;
     }
   }
@@ -161,7 +298,11 @@ export function evaluatePlaceContext(
   ) {
     isSheltered = true;
     score += 15;
-    reasons.push(`Plage bien abritée du vent de ${weatherContext.windCardinal}.`);
+    reasons.push(
+      isBeach
+        ? `Plage bien abritée du vent de ${weatherContext.windCardinal}.`
+        : `Site bien abrité du vent de ${weatherContext.windCardinal}.`
+    );
   } else if (weatherContext.windSpeedKnots >= 20) {
     score -= 15;
     if (!forceBadge) {
@@ -174,14 +315,18 @@ export function evaluatePlaceContext(
   if (weatherContext.isRaining) {
     if (rules.rainFriendly) {
       score += 30;
-      primaryReason = 'Idéal par temps de pluie (visite abritée)';
+      primaryReason = isHeritage
+        ? 'Idéal par temps pluvieux'
+        : 'Idéal par temps de pluie (visite abritée)';
       reasons.push('Site couvert ou abrité des intempéries.');
     } else {
       score -= 30;
       if (!forceBadge && score < 70) {
         forceBadge = 'WARNING';
       }
-      primaryReason = 'Activité de plein air déconseillée sous la pluie';
+      primaryReason = isViewpoint
+        ? 'Visibilité réduite sous la pluie'
+        : 'Activité de plein air déconseillée sous la pluie';
       reasons.push('Activité de plein air déconseillée sous la pluie.');
     }
   }
@@ -201,9 +346,29 @@ export function evaluatePlaceContext(
     badge = 'UNSUITABLE';
   }
 
+  const status: EvaluationStatus = badge === 'UNSUITABLE' ? 'DISCOURAGED' : badge;
+
+  // 6. Libellé du badge adapté à la catégorie
+  let badgeLabel = primaryReason || 'Conditions actuelles';
+  if (isHeritage) {
+    badgeLabel = weatherContext.isRaining ? 'Idéal par temps pluvieux' : 'Visite conseillée';
+  } else if (isGastronomy) {
+    badgeLabel = 'Idéal pour une pause gourmande';
+  } else if (isViewpoint) {
+    badgeLabel = weatherContext.isRaining ? 'Visibilité réduite sous la pluie' : 'Vue dégagée';
+  } else if (isBeach) {
+    if (badge === 'IDEAL') {
+      badgeLabel = 'Baignade idéale actuellement';
+    } else if (rules.tideConstraint === 'HIGH_TIDE_ONLY' && (forceBadge === 'UNSUITABLE' || score < 50)) {
+      badgeLabel = 'Basse mer : estran découvert';
+    }
+  }
+
   return {
     placeSlug: place.slug,
     badge,
+    status,
+    badgeLabel,
     score,
     titleReason: primaryReason || 'Conditions actuelles',
     reasons,
@@ -225,7 +390,7 @@ export function evaluatePlaceContext(
  * @param evaluations - Liste des résultats d'évaluation de lieux
  * @returns Nouvelle liste triée par score descendant
  */
-export function sortPlacesByContext<T extends ContextEvaluationResult & { isSponsored?: boolean }>(
+export function sortPlacesByContext<T extends { score: number; isSponsored?: boolean }>(
   evaluations: T[]
 ): T[] {
   return [...evaluations].sort((a, b) => {
