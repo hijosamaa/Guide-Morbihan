@@ -74,7 +74,7 @@ function SheetBody({
 
       {currentSelectedPlace ? (
         <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
-          {/* Bouton de retour vers la liste des spots */}
+          {/* Bouton de retour unique vers la liste des spots */}
           <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between bg-white/95 sticky top-0 z-20">
             <button
               type="button"
@@ -87,8 +87,8 @@ function SheetBody({
             </button>
           </div>
 
-          {/* Fiche détaillée enrichie */}
-          <PlaceDetailView place={currentSelectedPlace} onClose={handleClose} />
+          {/* Fiche détaillée enrichie (onClose non transmis ici pour éviter le bouton de fermeture dupliqué) */}
+          <PlaceDetailView place={currentSelectedPlace} />
         </div>
       ) : (
         <>
@@ -116,12 +116,6 @@ function SheetBody({
                   }
                   onSelect={(selected) => {
                     handleSnapChange(0.92);
-                    if (typeof window !== 'undefined') {
-                      const url = new URL(window.location.href);
-                      const slug = selected.slug || selected.id;
-                      url.searchParams.set('spot', slug);
-                      window.history.pushState({}, '', url.toString());
-                    }
                     onSelectPlace?.(selected);
                   }}
                 />
@@ -164,13 +158,6 @@ export function MobileExplorerSheet({
 
   const handleClose = () => {
     handleSnapChange(0.5);
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      if (url.searchParams.has('spot')) {
-        url.searchParams.delete('spot');
-        window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
-      }
-    }
     onClosePlace?.();
   };
 
