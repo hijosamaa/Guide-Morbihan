@@ -132,6 +132,7 @@ export interface TideDetails {
 }
 
 export type PlaceSourceType = 'DATATOURISME' | 'CURATED' | 'MANUAL';
+export type { PlaceMarkerData } from './map';
 
 export interface Place {
   id?: string;

@@ -132,17 +132,18 @@ export async function getAllPlaces(options: GetPlacesFilterOptions = {}): Promis
   };
 
   const defaultWeather = {
+    sector: 'VANNES',
     tempCelsius: 19,
     windSpeedKnots: 12,
     windDirectionDeg: 315,
-    windCardinal: 'NO' as const,
+    windCardinal: 'NW' as const,
     weatherCode: 1,
     isRaining: options.rainOnly ?? false,
     updatedAt: now,
   };
 
   return placesList.map((place) => {
-    const context = evaluatePlaceContext(place, defaultTide, defaultWeather);
+    const context = evaluatePlaceContext(place, now, defaultTide, defaultWeather);
 
     return {
       id: place.id || place.slug,
