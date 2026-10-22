@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { getCuratedSpots, findCuratedSpotBySlug } from '../src/lib/curated-spots.ts';
+import { getCuratedSpots, findCuratedSpotBySlug } from '../src/lib/curated-spots';
 
 describe('Curated Spots Data Store', () => {
   it('loads curated spots from json with rich practical info and non-plagiarized tips', () => {
