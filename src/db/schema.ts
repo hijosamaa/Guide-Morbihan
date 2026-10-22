@@ -59,6 +59,36 @@ export interface TrailMetadata {
   elevationProfile: { distKm: number; altM: number }[];
 }
 
+// 0. Territoires touristiques (socle multi-destinations France)
+export const territories = pgTable('territories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  slug: varchar('slug', { length: 64 }).notNull().unique(), // ex: 'morbihan-sud', 'luberon'
+  name: varchar('name', { length: 128 }).notNull(),
+  hasTides: boolean('has_tides').notNull().default(false),
+  centerLatitude: doublePrecision('center_latitude').notNull(),
+  centerLongitude: doublePrecision('center_longitude').notNull(),
+  defaultZoom: integer('default_zoom').notNull().default(11),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// 0-bis. Clusters géographiques intra-territoire avec barrières topologiques
+export const territoryClusters = pgTable(
+  'territory_clusters',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    territoryId: uuid('territory_id')
+      .references(() => territories.id, { onDelete: 'cascade' })
+      .notNull(),
+    slug: varchar('slug', { length: 64 }).notNull(),
+    name: varchar('name', { length: 128 }).notNull(),
+    barrierGroupId: integer('barrier_group_id').notNull().default(0),
+    weatherSectorSlug: varchar('weather_sector_slug', { length: 64 }).notNull(),
+  },
+  (table) => ({
+    territorySlugIdx: uniqueIndex('territory_cluster_slug_idx').on(table.territoryId, table.slug),
+  })
+);
+
 // 1. Table principale des Lieux, Plages et Sentiers
 export const places = pgTable(
   'places',
@@ -73,6 +103,10 @@ export const places = pgTable(
     commune: varchar('commune', { length: 100 }).notNull(),
     communeSlug: varchar('commune_slug', { length: 100 }).notNull(),
     sector: varchar('sector', { length: 100 }).notNull(),
+
+    // Rattachement territorial optionnel (rétrocompatibilité préservée)
+    territoryId: uuid('territory_id').references(() => territories.id),
+    clusterId: uuid('cluster_id').references(() => territoryClusters.id),
     
     // Coordonnées GPS principales et Parking
     latitude: doublePrecision('latitude').notNull(),
@@ -173,4 +207,29 @@ export const amenities = pgTable(
 
 export type Amenity = typeof amenities.$inferSelect;
 export type NewAmenity = typeof amenities.$inferInsert;
+
+// 4. Table des Séjours / Itinéraires Partagés
+export const itineraries = pgTable('itineraries', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  slug: varchar('slug', { length: 32 }).notNull().unique(), // nanoid court: 'morbihan-x89f2'
+  territoryId: uuid('territory_id')
+    .references(() => territories.id)
+    .notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  baseCommune: varchar('base_commune', { length: 100 }).notNull(),
+  startDate: varchar('start_date', { length: 10 }).notNull(), // 'YYYY-MM-DD'
+  durationDays: integer('duration_days').notNull(),
+  profile: jsonb('profile').notNull(),
+  itineraryData: jsonb('itinerary_data').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export type Territory = typeof territories.$inferSelect;
+export type NewTerritory = typeof territories.$inferInsert;
+export type TerritoryCluster = typeof territoryClusters.$inferSelect;
+export type NewTerritoryCluster = typeof territoryClusters.$inferInsert;
+export type Itinerary = typeof itineraries.$inferSelect;
+export type NewItinerary = typeof itineraries.$inferInsert;
+
 
