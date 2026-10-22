@@ -18,6 +18,8 @@ export interface ElevationProfileSvgProps {
   elevationLossM?: number;
   /** Whether to render top summary statistics cards */
   showStats?: boolean;
+  /** Live distance along track in km for real-time hiker position pin */
+  liveDistanceKm?: number | null;
   /** Callback fired when user scrubs or moves over a profile point */
   onHoverPoint?: (point: ElevationPoint | null) => void;
   /** Additional CSS class names for outer container */
@@ -34,6 +36,7 @@ export function ElevationProfileSvg({
   totalDistanceKm,
   elevationGainM,
   showStats = true,
+  liveDistanceKm = null,
   onHoverPoint,
   className = '',
 }: ElevationProfileSvgProps) {
@@ -166,6 +169,27 @@ export function ElevationProfileSvg({
 
           {/* Ridge line */}
           <path d={scales.pathLine} fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
+
+          {/* Live GPS Hiker Pin */}
+          {liveDistanceKm !== null && liveDistanceKm !== undefined && scales.totalDistanceKm > 0 && (
+            (() => {
+              const clampedDist = Math.max(0, Math.min(scales.totalDistanceKm, liveDistanceKm));
+              const liveX = (clampedDist / scales.totalDistanceKm) * svgWidth;
+              const livePoint = findNearestElevationPoint(points, clampedDist);
+              const ele = livePoint ? livePoint.elevationM : scales.minElevation;
+              const liveY =
+                svgHeight -
+                20 -
+                ((ele - scales.minElevation) / Math.max(5, scales.maxElevation - scales.minElevation)) *
+                  (svgHeight - 40);
+              return (
+                <g data-testid="live-hiker-pin">
+                  <circle cx={liveX} cy={liveY} r="7" fill="#0284c7" fillOpacity="0.3" />
+                  <circle cx={liveX} cy={liveY} r="4.5" fill="#0284c7" stroke="#ffffff" strokeWidth="2" />
+                </g>
+              );
+            })()
+          )}
 
           {/* Active scrubbing cursor */}
           {activeX !== null && activePoint && (

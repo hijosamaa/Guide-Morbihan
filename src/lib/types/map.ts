@@ -49,6 +49,16 @@ export interface GolfeMapProps {
   activeSnapPoint?: string | number | null;
 }
 
+export interface SubmersiblePassageInfo {
+  name: string;
+  distanceKm: number;
+  opensAt: Date | string;
+  closesAt: Date | string;
+  tideCoefficient?: number;
+  windSpeedKnots?: number;
+  windCardinal?: string;
+}
+
 export interface GpxTrackViewerProps {
   geojson: GeoJSON.Feature<GeoJSON.LineString>;
   elevationProfile: ElevationPoint[];
@@ -58,4 +68,10 @@ export interface GpxTrackViewerProps {
   title?: string;
   className?: string;
   showStats?: boolean;
+  enableLiveTracking?: boolean;
+  submersiblePassage?: SubmersiblePassageInfo;
+  tideAlert?: {
+    status: 'PASSABLE' | 'WARNING_CLOSING' | 'SUBMERGED';
+    message: string;
+  };
 }

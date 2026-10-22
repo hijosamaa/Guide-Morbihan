@@ -99,3 +99,18 @@ test('ElevationProfileSvg handles flat elevation routes cleanly', () => {
   assert.ok(html.includes('<path'));
 });
 
+test('ElevationProfileSvg renders live hiker pin when liveDistanceKm is provided', () => {
+  const html = renderToString(
+    React.createElement(ElevationProfileSvg, {
+      points: sampleProfile,
+      totalDistanceKm: 5.0,
+      elevationGainM: 35,
+      liveDistanceKm: 2.5,
+    })
+  );
+
+  assert.ok(html.includes('data-testid="live-hiker-pin"'));
+  assert.ok(html.includes('fill="#0284c7"'));
+});
+
+
