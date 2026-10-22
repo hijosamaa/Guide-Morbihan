@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import './globals.css';
 
 // Configuration viewport mobile-native conforme aux standards PWA
@@ -25,7 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <body className="min-h-screen antialiased bg-slate-50 text-slate-900">{children}</body>
+      <body className="min-h-screen antialiased bg-slate-50 text-slate-900">
+        <NuqsAdapter>{children}</NuqsAdapter>
+      </body>
     </html>
   );
 }
