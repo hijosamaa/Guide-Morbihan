@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useQueryState, parseAsString, parseAsBoolean } from 'nuqs';
 import { FloatingContextPill } from '@/components/context/FloatingContextPill';
 import { TidalAlertChip } from '@/components/context/TidalAlertChip';
@@ -12,11 +12,11 @@ import type { PlaceMarkerData } from '@/lib/types/map';
 import type { Place } from '@/lib/types/context';
 import curatedSpotsData from '../../../data/curated-spots.json';
 
-// Échantillon initial représentatif des lieux phares du Golfe
+// Échantillon initial représentatif des lieux phares du Golfe aligné avec les slugs officiels curés
 const INITIAL_PLACES: PlaceMarkerData[] = [
   {
     id: 'berder',
-    slug: 'passage-berder',
+    slug: 'ile-de-berder',
     name: 'Île de Berder',
     latitude: 47.5794,
     longitude: -2.8872,
@@ -49,7 +49,7 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
   },
   {
     id: 'suscinio',
-    slug: 'domaine-suscinio',
+    slug: 'chateau-de-suscinio',
     name: 'Château de Suscinio',
     latitude: 47.5144,
     longitude: -2.7297,
@@ -59,31 +59,46 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
   },
 ];
 
+// Alias et correspondances d'identifiants historiques
+const SPOT_SLUG_ALIASES: Record<string, string> = {
+  berder: 'ile-de-berder',
+  'passage-berder': 'ile-de-berder',
+  'ile-de-berder': 'ile-de-berder',
+  fogeo: 'plage-fogeo',
+  'plage-fogeo': 'plage-fogeo',
+  'saint-goustan': 'port-saint-goustan',
+  'port-saint-goustan': 'port-saint-goustan',
+  suscinio: 'chateau-de-suscinio',
+  'domaine-suscinio': 'chateau-de-suscinio',
+  'chateau-de-suscinio': 'chateau-de-suscinio',
+};
+
 /**
  * Retrouve les détails enrichis d'un lieu à partir de son slug ou de son identifiant.
  */
 function findSpotBySlugOrId(slugOrId: string | null): Place | null {
   if (!slugOrId) return null;
-  const normalized = slugOrId.toLowerCase().trim();
+  const raw = slugOrId.toLowerCase().trim();
+  const targetSlug = SPOT_SLUG_ALIASES[raw] || raw;
 
   // 1. Recherche prioritaire dans les spots curés enrichis
   const curated = (curatedSpotsData as unknown as Place[]).find(
     (s) =>
-      s.slug === normalized ||
-      s.slug === slugOrId ||
-      (s.id && s.id === slugOrId) ||
-      s.slug.replace(/-/g, '').includes(normalized.replace(/-/g, '')) ||
-      normalized.replace(/-/g, '').includes(s.slug.replace(/-/g, ''))
+      s.slug === targetSlug ||
+      s.slug === raw ||
+      (s.id && s.id === raw) ||
+      s.slug.replace(/-/g, '').includes(targetSlug.replace(/-/g, '')) ||
+      targetSlug.replace(/-/g, '').includes(s.slug.replace(/-/g, ''))
   );
   if (curated) return curated;
 
   // 2. Repli vers les lieux initiaux si non trouvé dans les fiches curées
   const initial = INITIAL_PLACES.find(
     (p) =>
-      p.slug === normalized ||
-      p.id === slugOrId ||
-      p.slug === slugOrId ||
-      p.id.toLowerCase() === normalized
+      p.slug === targetSlug ||
+      p.slug === raw ||
+      p.id === raw ||
+      p.id.toLowerCase() === raw
   );
   if (initial) {
     return {
@@ -119,11 +134,22 @@ function CarteExplorerContent() {
     selectedSpot ? 0.92 : '140px'
   );
 
-  // Synchronisation automatique si le paramètre d'URL change (navigation externe, partage de lien)
+  const isFirstMount = useRef(true);
+
+  // Synchronisation automatique si le paramètre d'URL change (navigation externe, partage de lien, retour navigateur)
   useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
     if (selectedSpot) {
       setSelectedPlaceId(selectedSpot);
       setActiveSnapPoint(0.92);
+    } else {
+      // Retour navigateur ou réinitialisation d'URL : referme la fiche et réinitialise le tiroir
+      setSelectedPlaceId(null);
+      setActiveSnapPoint(0.5);
     }
   }, [selectedSpot]);
 
@@ -144,24 +170,12 @@ function CarteExplorerContent() {
     const slug = (place as Place).slug || place.id || '';
     setSelectedPlaceId(slug);
     setActiveSnapPoint(0.92); // Ouvre en grand le tiroir à 0.92 lors de la sélection
-
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('spot', slug);
-      window.history.pushState({}, '', url.toString());
-    }
     setSelectedSpot(slug, { shallow: true, history: 'push' });
   };
 
   const handleClosePlace = () => {
     setSelectedPlaceId(null);
     setActiveSnapPoint(0.5); // Réinitialise le tiroir à mi-hauteur au retour à la liste
-
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.delete('spot');
-      window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
-    }
     setSelectedSpot('', { shallow: true, history: 'push' });
   };
 
