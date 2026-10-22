@@ -341,3 +341,151 @@ export function evaluatePassageStatus(
     hazardNotice: isFloodOrRising ? config.hazardNoticeFlood : undefined,
   };
 }
+
+export interface DayTidesSummary {
+  harbor: 'PORT_NAVALO' | 'VANNES';
+  date: Date;
+  events: TidePoint[];
+  afternoonTidePhase: 'HIGH' | 'LOW' | 'FLOOD' | 'EBB';
+  isAfternoonHigh: boolean;
+  isAfternoonLow: boolean;
+  highTide?: TidePoint;
+  lowTide?: TidePoint;
+  coefficient: number;
+  summaryText: string;
+}
+
+/**
+ * Calcule l'éphéméride des marées pour une journée cible sur un port donné.
+ * Si aucun événement réel n'est fourni, synthétise une courbe semi-diurne harmonique.
+ */
+export function calculateDayTides(
+  date: Date,
+  harbor: 'PORT_NAVALO' | 'VANNES' = 'PORT_NAVALO',
+  events?: TidePoint[]
+): DayTidesSummary {
+  const targetDate = new Date(date);
+  const startOfDay = new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate(), 0, 0, 0));
+  const endOfDay = new Date(Date.UTC(targetDate.getUTCFullYear(), targetDate.getUTCMonth(), targetDate.getUTCDate(), 23, 59, 59));
+
+  let dayEvents: TidePoint[] = [];
+
+  if (events && events.length > 0) {
+    dayEvents = events
+      .filter((e) => e.harbor === harbor && e.eventTimestamp >= startOfDay && e.eventTimestamp <= endOfDay)
+      .sort((a, b) => a.eventTimestamp.getTime() - b.eventTimestamp.getTime());
+  }
+
+  // Si pas d'événements fournis pour ce jour, synthèse semi-diurne M2
+  if (dayEvents.length < 2) {
+    const EPOCH_MS = new Date('2026-10-21T05:12:00Z').getTime(); // Pleine mer référence Port-Navalo
+    const M2_HALF_PERIOD_MS = 6.2103 * 3600 * 1000; // ~6h 12m 37s
+    const harborDelayMs = harbor === 'VANNES' ? 1.75 * 3600 * 1000 : 0;
+
+    const windowStart = startOfDay.getTime() - 2 * 3600 * 1000;
+    const windowEnd = endOfDay.getTime() + 2 * 3600 * 1000;
+
+    const baseK = Math.floor((windowStart - EPOCH_MS - harborDelayMs) / M2_HALF_PERIOD_MS);
+
+    for (let k = baseK; k <= baseK + 8; k++) {
+      const eventTime = EPOCH_MS + harborDelayMs + k * M2_HALF_PERIOD_MS;
+      if (eventTime >= startOfDay.getTime() && eventTime <= endOfDay.getTime()) {
+        const isHigh = k % 2 === 0;
+        dayEvents.push({
+          harbor,
+          eventType: isHigh ? 'HIGH' : 'LOW',
+          eventTimestamp: new Date(eventTime),
+          heightMeters: isHigh ? (harbor === 'VANNES' ? 4.3 : 4.9) : (harbor === 'VANNES' ? 1.4 : 1.1),
+          coefficient: isHigh ? 75 : null,
+        });
+      }
+    }
+    dayEvents.sort((a, b) => a.eventTimestamp.getTime() - b.eventTimestamp.getTime());
+  }
+
+  const highTides = dayEvents.filter((e) => e.eventType === 'HIGH');
+  const lowTides = dayEvents.filter((e) => e.eventType === 'LOW');
+
+  // Détection de la marée d'après-midi (fenêtre 13h - 18h UTC/locale)
+  const afternoonStartHour = 13;
+  const afternoonEndHour = 18;
+
+  const afternoonHigh = highTides.find((e) => {
+    const h = e.eventTimestamp.getUTCHours();
+    return h >= afternoonStartHour && h <= afternoonEndHour;
+  });
+
+  const afternoonLow = lowTides.find((e) => {
+    const h = e.eventTimestamp.getUTCHours();
+    return h >= afternoonStartHour && h <= afternoonEndHour;
+  });
+
+  let isAfternoonHigh = false;
+  let isAfternoonLow = false;
+  let afternoonTidePhase: 'HIGH' | 'LOW' | 'FLOOD' | 'EBB' = 'FLOOD';
+
+  if (afternoonHigh && !afternoonLow) {
+    isAfternoonHigh = true;
+    afternoonTidePhase = 'HIGH';
+  } else if (afternoonLow && !afternoonHigh) {
+    isAfternoonLow = true;
+    afternoonTidePhase = 'LOW';
+  } else if (afternoonHigh && afternoonLow) {
+    // Les deux tombent dans l'après-midi : compare la proximité avec 15h30
+    const diffHigh = Math.abs(afternoonHigh.eventTimestamp.getUTCHours() - 15.5);
+    const diffLow = Math.abs(afternoonLow.eventTimestamp.getUTCHours() - 15.5);
+    if (diffHigh <= diffLow) {
+      isAfternoonHigh = true;
+      afternoonTidePhase = 'HIGH';
+    } else {
+      isAfternoonLow = true;
+      afternoonTidePhase = 'LOW';
+    }
+  } else {
+    // Événement le plus proche de 15h
+    const allAfternoonCandidates = [...dayEvents].sort(
+      (a, b) => Math.abs(a.eventTimestamp.getUTCHours() - 15) - Math.abs(b.eventTimestamp.getUTCHours() - 15)
+    );
+    const nearest = allAfternoonCandidates[0];
+    if (nearest?.eventType === 'HIGH') {
+      isAfternoonHigh = true;
+      afternoonTidePhase = 'HIGH';
+    } else {
+      isAfternoonLow = true;
+      afternoonTidePhase = 'LOW';
+    }
+  }
+
+  const mainHigh = highTides[0] || dayEvents[0];
+  const mainLow = lowTides[0] || dayEvents[1];
+  const maxCoeff = Math.max(...highTides.map((h) => h.coefficient || 70), 75);
+
+  const formatTime = (d?: Date) => {
+    if (!d) return '--:--';
+    const hours = String(d.getUTCHours()).padStart(2, '0');
+    const mins = String(d.getUTCMinutes()).padStart(2, '0');
+    return `${hours}h${mins}`;
+  };
+
+  let summaryText = '';
+  if (isAfternoonHigh && afternoonHigh) {
+    summaryText = `Pleine mer à ${formatTime(afternoonHigh.eventTimestamp)} (coef ${maxCoeff}) — Idéal baignade`;
+  } else if (isAfternoonLow && afternoonLow) {
+    summaryText = `Basse mer à ${formatTime(afternoonLow.eventTimestamp)} (coef ${maxCoeff}) — Idéal passage submersible & pêche à pied`;
+  } else {
+    summaryText = `PM ${formatTime(mainHigh?.eventTimestamp)} / BM ${formatTime(mainLow?.eventTimestamp)} (coef ${maxCoeff})`;
+  }
+
+  return {
+    harbor,
+    date: targetDate,
+    events: dayEvents,
+    afternoonTidePhase,
+    isAfternoonHigh,
+    isAfternoonLow,
+    highTide: mainHigh,
+    lowTide: mainLow,
+    coefficient: maxCoeff,
+    summaryText,
+  };
+}
