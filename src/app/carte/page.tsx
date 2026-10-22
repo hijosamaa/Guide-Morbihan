@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useQueryState, parseAsString, parseAsBoolean } from 'nuqs';
 import { FloatingContextPill } from '@/components/context/FloatingContextPill';
 import { TidalAlertChip } from '@/components/context/TidalAlertChip';
@@ -9,6 +9,8 @@ import { DesktopSplitExplorer } from '@/components/explorer/DesktopSplitExplorer
 import { DynamicGolfeMap, MapSkeleton } from '@/components/map';
 import { useFilteredPlaces } from '@/lib/hooks/useFilteredPlaces';
 import type { PlaceMarkerData } from '@/lib/types/map';
+import type { Place } from '@/lib/types/context';
+import curatedSpotsData from '../../../data/curated-spots.json';
 
 // Échantillon initial représentatif des lieux phares du Golfe
 const INITIAL_PLACES: PlaceMarkerData[] = [
@@ -57,6 +59,54 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
   },
 ];
 
+/**
+ * Retrouve les détails enrichis d'un lieu à partir de son slug ou de son identifiant.
+ */
+function findSpotBySlugOrId(slugOrId: string | null): Place | null {
+  if (!slugOrId) return null;
+  const normalized = slugOrId.toLowerCase().trim();
+
+  // 1. Recherche prioritaire dans les spots curés enrichis
+  const curated = (curatedSpotsData as unknown as Place[]).find(
+    (s) =>
+      s.slug === normalized ||
+      s.slug === slugOrId ||
+      (s.id && s.id === slugOrId) ||
+      s.slug.replace(/-/g, '').includes(normalized.replace(/-/g, '')) ||
+      normalized.replace(/-/g, '').includes(s.slug.replace(/-/g, ''))
+  );
+  if (curated) return curated;
+
+  // 2. Repli vers les lieux initiaux si non trouvé dans les fiches curées
+  const initial = INITIAL_PLACES.find(
+    (p) =>
+      p.slug === normalized ||
+      p.id === slugOrId ||
+      p.slug === slugOrId ||
+      p.id.toLowerCase() === normalized
+  );
+  if (initial) {
+    return {
+      id: initial.id,
+      slug: initial.slug,
+      name: initial.name,
+      category: initial.category as any,
+      latitude: initial.latitude,
+      longitude: initial.longitude,
+      shortDescription: initial.label,
+      contextualRules: {
+        tideConstraint: 'ALL_TIDES',
+        dogsAllowedSummer: true,
+        strollerFriendly: true,
+        rainFriendly: true,
+      },
+      isSponsored: initial.isSponsored,
+    };
+  }
+
+  return null;
+}
+
 function CarteExplorerContent() {
   const [selectedCat] = useQueryState('cat', parseAsString.withDefault('ALL'));
   const [tideFilter] = useQueryState('maree', parseAsString.withDefault('ALL'));
@@ -64,8 +114,18 @@ function CarteExplorerContent() {
   const [rainOnly] = useQueryState('pluie', parseAsBoolean.withDefault(false));
   const [selectedSpot, setSelectedSpot] = useQueryState('spot', parseAsString.withDefault(''));
 
-  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [activeSnapPoint, setActiveSnapPoint] = useState<string | number | null>('140px');
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(() => selectedSpot || null);
+  const [activeSnapPoint, setActiveSnapPoint] = useState<string | number | null>(() =>
+    selectedSpot ? 0.92 : '140px'
+  );
+
+  // Synchronisation automatique si le paramètre d'URL change (navigation externe, partage de lien)
+  useEffect(() => {
+    if (selectedSpot) {
+      setSelectedPlaceId(selectedSpot);
+      setActiveSnapPoint(0.92);
+    }
+  }, [selectedSpot]);
 
   const filteredPlaces = useFilteredPlaces(INITIAL_PLACES, {
     category: selectedCat,
@@ -76,12 +136,33 @@ function CarteExplorerContent() {
     rainOnly,
   });
 
-  const effectiveSelectedId = selectedPlaceId || selectedSpot || null;
+  const effectiveSpotSlug = selectedSpot || selectedPlaceId || null;
+  const selectedPlace = effectiveSpotSlug ? findSpotBySlugOrId(effectiveSpotSlug) : null;
+  const effectiveSelectedId = selectedPlace ? (selectedPlace.id || selectedPlace.slug) : effectiveSpotSlug;
 
-  const handleSelectPlace = (place: PlaceMarkerData) => {
-    setSelectedPlaceId(place.id);
-    setSelectedSpot(place.id, { shallow: true, history: 'replace' });
-    setActiveSnapPoint(0.5); // Ouvre le tiroir à mi-hauteur sur mobile lors du clic marqueur/carte
+  const handleSelectPlace = (place: PlaceMarkerData | Place) => {
+    const slug = (place as Place).slug || place.id || '';
+    setSelectedPlaceId(slug);
+    setActiveSnapPoint(0.92); // Ouvre en grand le tiroir à 0.92 lors de la sélection
+
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('spot', slug);
+      window.history.pushState({}, '', url.toString());
+    }
+    setSelectedSpot(slug, { shallow: true, history: 'push' });
+  };
+
+  const handleClosePlace = () => {
+    setSelectedPlaceId(null);
+    setActiveSnapPoint(0.5); // Réinitialise le tiroir à mi-hauteur au retour à la liste
+
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('spot');
+      window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
+    }
+    setSelectedSpot('', { shallow: true, history: 'push' });
   };
 
   return (
@@ -128,8 +209,10 @@ function CarteExplorerContent() {
       {/* Bottom Sheet Mobile (< 1024px) */}
       <MobileExplorerSheet
         places={filteredPlaces}
+        selectedPlace={selectedPlace}
         selectedPlaceId={effectiveSelectedId}
         onSelectPlace={handleSelectPlace}
+        onClosePlace={handleClosePlace}
         activeSnapPoint={activeSnapPoint}
         onSnapChange={setActiveSnapPoint}
         isRaining={rainOnly}
