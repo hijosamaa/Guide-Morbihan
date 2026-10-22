@@ -1,0 +1,514 @@
+[
+  {
+    "slug": "ile-de-berder",
+    "name": "Île de Berder",
+    "shortDescription": "Joyau boisé accessible à pied uniquement à marée basse par une chaussée submersible pavée.",
+    "fullDescription": "Située face au puissant courant de la Jument, Berder offre une boucle piétonne ombragée de 2,6 km aux panoramas changeants. Les pins maritimes et les criques rocheuses dominent les courants marins bouillonnants du Golfe.",
+    "category": "TIDAL_PASSAGE",
+    "commune": "Larmor-Baden",
+    "communeSlug": "larmor-baden",
+    "sector": "ARRADON",
+    "latitude": 47.5794,
+    "longitude": -2.8887,
+    "parkingLat": 47.5872,
+    "parkingLng": -2.8941,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "LOW_TIDE_ONLY",
+      "tideOffsetHours": { "beforeLow": 2, "afterLow": 2 },
+      "shelteredFromWindDirections": ["N", "NE"],
+      "strollerFriendly": false,
+      "dogsAllowedSummer": true,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 90,
+      "pricing": "Gratuit",
+      "amenities": ["parking"],
+      "insiderTip": "Ne tentez jamais la traversée si l'eau commence à recouvrir les pavés : le courant de la Jument monte très vite et s'avère extrêmement violent.",
+      "goodToKnow": "Stationnement obligatoire sur les parkings balisés en amont du port de Larmor-Baden avant d'accéder au cordon littoral.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Observation spectaculaire du courant depuis la pointe sud.",
+      "lowTideAdvantage": "Passage à pied au sec pendant environ 4h autour de la basse mer.",
+      "warningNote": "Chaussée submersible coupée à marée haute. Vérifiez le compte à rebours."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+        "caption": "La chaussée pavée submersible de Berder à marée basse",
+        "isCover": true
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Sentier sous les pins maritimes longeant les passes maritimes",
+        "isCover": false
+      }
+    ]
+  },
+  {
+    "slug": "passage-de-tascon",
+    "name": "Passage de l'Île de Tascon",
+    "shortDescription": "Cordon submersible de terre et de coquillages reliant Saint-Armel à la petite île agricole de Tascon.",
+    "fullDescription": "Au cœur des méandres calmes de l'est du Golfe, le passage de Tascon offre une traversée paisible au milieu des parcs à huîtres et des vasières où nichent hérons et aigrettes. L'île abrite une exploitation bovine et des chemins bordés de murets de pierre sèche.",
+    "category": "TIDAL_PASSAGE",
+    "commune": "Saint-Armel",
+    "communeSlug": "saint-armel",
+    "sector": "SARZEAU",
+    "latitude": 47.5714,
+    "longitude": -2.7162,
+    "parkingLat": 47.5728,
+    "parkingLng": -2.7135,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "LOW_TIDE_ONLY",
+      "tideOffsetHours": { "beforeLow": 2, "afterLow": 2 },
+      "shelteredFromWindDirections": ["E", "SE"],
+      "strollerFriendly": false,
+      "dogsAllowedSummer": true,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 120,
+      "pricing": "Gratuit",
+      "amenities": ["parking"],
+      "insiderTip": "Le sol du gué est sablo-graveleux et souvent mouillé : chaussez des bottes courtes ou de vieilles baskets plutôt que des sandales de plage.",
+      "goodToKnow": "Les véhicules motorisés sont strictement interdits sur l'île sans autorisation des résidents.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Observation ornithologique depuis la berge de Saint-Armel.",
+      "lowTideAdvantage": "Découverte de l'estran et traversée à pied sec pendant près de 4h.",
+      "warningNote": "Passage recouvert dès mi-marée montante avec envasement possible sur les bas-côtés."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Le gué submersible menant à l'Île de Tascon à marée basse",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "presqu-ile-de-conleau",
+    "name": "Presqu'île et Bassin de Conleau",
+    "shortDescription": "Véritable village insulaire rattaché à Vannes, réputé pour sa piscine d'eau de mer et ses chalets sous les pins.",
+    "fullDescription": "Halte balnéaire historique des Vannetais depuis le XIXe siècle, Conleau séduit par son ambiance rétro, ses maisons aux volets colorés et son bassin d'eau de mer permettant la baignade à toute heure, même quand le Golfe s'est retiré au loin.",
+    "category": "BEACH",
+    "commune": "Vannes",
+    "communeSlug": "vannes",
+    "sector": "VANNES",
+    "latitude": 47.6322,
+    "longitude": -2.7761,
+    "parkingLat": 47.6335,
+    "parkingLng": -2.7742,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["NE", "E", "SE"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": false,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 75,
+      "pricing": "Gratuit",
+      "amenities": ["toilets", "food", "parking", "shade"],
+      "insiderTip": "En plein été, évitez de saturer le petit parking de la presqu'île : garez-vous au parking relais du Vincin et empruntez le sentier boisé qui longe la rivière jusqu'à la piscine.",
+      "goodToKnow": "Le bassin d'eau de mer est surveillé en haute saison et filtré naturellement à chaque marée.",
+      "bestSeason": ["SPRING", "SUMMER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Baignade optimale dans le bassin rempli et vue dégagée sur les voiliers.",
+      "lowTideAdvantage": "Accès maintenu au plan d'eau clos même à basse mer.",
+      "warningNote": "Courants modérés dans le chenal principal hors de la piscine."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Bassin d'eau de mer de Conleau et pinède sous le soleil vannetais",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "port-blanc-baden",
+    "name": "Port-Blanc Baden",
+    "shortDescription": "Port d'embarquement névralgique vers l'Île-aux-Moines et balcon animé sur les courants du Golfe.",
+    "fullDescription": "Port-Blanc est le carrefour maritime du Golfe : les navettes y croisent les sinagots et les voiliers de plaisance dans un ballet incessant. La cale et la promenade piétonne offrent un poste d'observation privilégié sur les mouvements de marée.",
+    "category": "NAUTICAL",
+    "commune": "Baden",
+    "communeSlug": "baden",
+    "sector": "ARRADON",
+    "latitude": 47.6025,
+    "longitude": -2.8617,
+    "parkingLat": 47.6045,
+    "parkingLng": -2.8601,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["NW", "N", "NE"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": true,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 60,
+      "pricing": "Accès libre (traversée payante)",
+      "amenities": ["toilets", "water", "food", "parking"],
+      "insiderTip": "Les jours de grand départ estival pour l'Île-aux-Moines, le parking se remplit dès 10h. Venez à vélo via la voie douce aménagée depuis le bourg de Baden.",
+      "goodToKnow": "Départs de navettes maritimes toutes les 30 minutes toute l'année, traversée express en 5 minutes.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Spectacle maritime intense avec le bouillonnement des bateaux au mouillage.",
+      "lowTideAdvantage": "Observation de la vie des parcs ostréicoles environnants.",
+      "warningNote": "Embarcadère très fréquenté en milieu de journée en juillet et août."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Embarcadère et navettes de Port-Blanc face à l'Île-aux-Moines",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "chateau-de-suscinio",
+    "name": "Château et Marais de Suscinio",
+    "shortDescription": "Forteresse médiévale des Ducs de Bretagne posée entre marais salants et dunes de l'océan.",
+    "fullDescription": "Érigé aux XIIIe et XIVe siècles au milieu d'un vaste domaine de chasse ducale, Suscinio dresse ses puissantes tours de granit face aux roselières. Ses douves en eau, ses pavements médiévaux uniques et la proximité immédiate de la plage de Landrezac en font une étape patrimoniale majeure.",
+    "category": "HERITAGE",
+    "commune": "Sarzeau",
+    "communeSlug": "sarzeau",
+    "sector": "SARZEAU",
+    "latitude": 47.5137,
+    "longitude": -2.7292,
+    "parkingLat": 47.5152,
+    "parkingLng": -2.7268,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["W", "SW"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": false,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 120,
+      "pricing": "Entrée payante pour le château, extérieur et marais gratuits",
+      "amenities": ["toilets", "water", "food", "parking", "picnic_table"],
+      "insiderTip": "Le sentier d'interprétation qui fait le tour des marais extérieurs est en accès libre : la tombée de la nuit y offre un coucher de soleil magistral sur les douves illuminées.",
+      "goodToKnow": "Spectacle son et lumière nocturne réputé durant les soirs d'été.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Idéal pour combiner la visite médiévale et une baignade sur la plage de Landrezac à 500m.",
+      "lowTideAdvantage": "Pêche à pied possible sur les rochers de Beg Velin en contrebas.",
+      "warningNote": "Visite intérieure du château non soumise aux marées."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Les imposantes tours médiévales du Château de Suscinio dominant les douves",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "alignements-de-carnac",
+    "name": "Alignements Mégalithiques de Carnac",
+    "shortDescription": "Le plus vaste ensemble mégalithique au monde, alignant près de 3000 menhirs érigés il y a 6000 ans.",
+    "fullDescription": "S'étendant sur plus de quatre kilomètres entre le Ménec, Kermario et Kerlescan, ce sanctuaire néolithique dresse ses menhirs de granit en lignes parallèles fascinantes. La Maison des Mégalithes propose une mise en perspective captivante de cette ingénierie préhistorique.",
+    "category": "HERITAGE",
+    "commune": "Carnac",
+    "communeSlug": "carnac",
+    "sector": "LOCMARIAQUER",
+    "latitude": 47.5923,
+    "longitude": -3.0825,
+    "parkingLat": 47.5939,
+    "parkingLng": -3.0818,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["NE", "N"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": true,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 105,
+      "pricing": "Extérieur libre en basse saison, visites guidées payantes",
+      "amenities": ["toilets", "water", "parking", "food"],
+      "insiderTip": "Privilégiez le champ de Kerlescan à l'est, beaucoup plus paisible que Le Ménec : la lumière rasante de fin d'après-midi entre les pins y est enchanteresse.",
+      "goodToKnow": "De juin à septembre, l'accès à l'intérieur des enclos se fait exclusivement en visite guidée pour préserver la végétation.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Activité terrestre totalement indépendante des marées.",
+      "lowTideAdvantage": "Idéal pour une visite matinale avant d'aller sur les plages de Carnac l'après-midi.",
+      "warningNote": "Protection solaire et casquette indispensables car le site est très peu abrité du soleil."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1599839575945-a9e5af0c3fa5?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Alignements de menhirs du Ménec baignés de brume matinale",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "port-saint-goustan",
+    "name": "Port Historique de Saint-Goustan",
+    "shortDescription": "Havre médiéval pavé blotti au pied des remparts d'Auray, immortalisé par Benjamin Franklin.",
+    "fullDescription": "Avec son pont en pierre à quatre arches du XIIIe siècle, ses façades à pans de bois et ses quais bordés de terrasses animées, Saint-Goustan transporte les promeneurs dans l'histoire maritime d'Armorique. Un écrin préservé au creux de la ria d'Auray.",
+    "category": "HERITAGE",
+    "commune": "Auray",
+    "communeSlug": "auray",
+    "sector": "ARRADON",
+    "latitude": 47.6669,
+    "longitude": -2.9772,
+    "parkingLat": 47.6698,
+    "parkingLng": -2.9815,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["W", "NW", "SW"],
+      "strollerFriendly": false,
+      "dogsAllowedSummer": true,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 90,
+      "pricing": "Gratuit",
+      "amenities": ["toilets", "food", "parking"],
+      "insiderTip": "Ne cherchez pas à descendre en voiture sur les quais étroits : stationnez au parking du Belvédère en ville haute et descendez par les venelles pavées des Rampes du Loch.",
+      "goodToKnow": "Marché d'artisans d'art et bouquinistes fréquents sur les quais le week-end et en été.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Les vieux gréements flottent majestueusement au pied des terrasses du quai Franklin.",
+      "lowTideAdvantage": "La ria découvre son lit de vase où se nourrissent de nombreux échassiers.",
+      "warningNote": "Chaussée pavée médiévale glissante par temps pluvieux."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Les quais pavés et les façades à colombages du port de Saint-Goustan",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "plage-des-7-iles",
+    "name": "Plage des Sept Îles",
+    "shortDescription": "Anse de sable fin face à l'îlot des Sept Îles relié à marée basse par un tombolo sablonneux.",
+    "fullDescription": "Cette plage sauvage est l'une des plus spectaculaires de la côte nord du Golfe. À mi-marée et basse mer, une bande de sable blond se découvre pour rejoindre l'îlot inhabité d'en face, offrant une vue panoramique sur l'entrée de la baie de Port-Navalo.",
+    "category": "BEACH",
+    "commune": "Baden",
+    "communeSlug": "baden",
+    "sector": "ARRADON",
+    "latitude": 47.5912,
+    "longitude": -2.8988,
+    "parkingLat": 47.5935,
+    "parkingLng": -2.8992,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "HIGH_TIDE_ONLY",
+      "tideOffsetHours": { "beforeHigh": 2, "afterHigh": 2 },
+      "shelteredFromWindDirections": ["N", "NE", "NW"],
+      "strollerFriendly": false,
+      "dogsAllowedSummer": false,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 120,
+      "pricing": "Gratuit",
+      "amenities": ["parking"],
+      "insiderTip": "Surveillez attentivement l'heure de remontée de la mer : le tombolo de sable blanc disparaît en moins de vingt minutes et vous contraindrait à nager pour regagner la berge.",
+      "goodToKnow": "Site naturel protégé avec végétation dunaire fragile : restez impérativement sur le sentier balisé.",
+      "bestSeason": ["SPRING", "SUMMER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Baignade agréable dans une eau translucide à l'abri des vents de nord.",
+      "lowTideAdvantage": "Découverte du tombolo sableux permettant de faire le tour de l'îlot à pied.",
+      "warningNote": "Courant sous-marin sensible à la pointe de l'îlot lors du flot."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Le tombolo de sable fin reliant la plage des Sept Îles à marée descendante",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "pointe-du-conguel",
+    "name": "Pointe du Conguel",
+    "shortDescription": "Extrémité sud-est de la presqu'île de Quiberon ouvrant un panorama à 360° sur Belle-Île, Houat et Hœdic.",
+    "fullDescription": "Balayée par les embruns et bordée de landes rases aux ajoncs épineux, la Pointe du Conguel forme l'avant-poste de Quiberon vers le large. Le sentier côtier permet d'observer le chenal du Passage de la Teignouse et son célèbre phare strié de rouge et de blanc.",
+    "category": "VIEWPOINT",
+    "commune": "Quiberon",
+    "communeSlug": "quiberon",
+    "sector": "QUIBERON",
+    "latitude": 47.4691,
+    "longitude": -3.0975,
+    "parkingLat": 47.4715,
+    "parkingLng": -3.1022,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["NE", "E"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": true,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 60,
+      "pricing": "Gratuit",
+      "amenities": ["parking", "picnic_table"],
+      "insiderTip": "Par vent de sud-ouest fort, la pointe est spectaculaire mais exposée : prévoyez un coupe-vent thermique même en plein mois d'août.",
+      "goodToKnow": "Boucle pédestre facile d'environ 1,5 km très bien aménagée avec des panneaux sur les fours à goémon historiques.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Les vagues déferlent sur les récifs rocheux dans un fracas vivifiant.",
+      "lowTideAdvantage": "Possibilité d'explorer les petites criques rocheuses et les mares résiduelles.",
+      "warningNote": "Attention aux coups de mer sur les rochers en période de tempête."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Vue panoramique sur la Baie de Quiberon depuis la Pointe du Conguel",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "tumulus-de-tumiac",
+    "name": "Tumulus de Tumiac (Butte de César)",
+    "shortDescription": "Monument mégalithique funéraire culminant sur la presqu'île de Rhuys avec vue panoramique sur le Golfe.",
+    "fullDescription": "Ce cairn gigantesque vieux de plus de 6500 ans aurait servi d'observatoire à Jules César lors de sa bataille navale contre les Vénètes en 56 avant J.-C. Son sommet offre une lecture géographique incomparable des passes du Golfe et de l'océan.",
+    "category": "HERITAGE",
+    "commune": "Arzon",
+    "communeSlug": "arzon",
+    "sector": "SARZEAU",
+    "latitude": 47.5401,
+    "longitude": -2.8703,
+    "parkingLat": 47.5412,
+    "parkingLng": -2.8718,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["SW", "W"],
+      "strollerFriendly": false,
+      "dogsAllowedSummer": true,
+      "rainFriendly": false
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 45,
+      "pricing": "Gratuit",
+      "amenities": ["parking", "picnic_table"],
+      "insiderTip": "Montez au sommet avec une paire de jumelles au coucher du soleil : l'alignement visuel entre les îles et l'entrée de Port-Navalo est d'une clarté saisissante.",
+      "goodToKnow": "Le tumulus est engazonné ; le sentier d'ascension comporte des marches en bois un peu raides.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Vue remarquable sur le goulet plein et l'entrée des bateaux dans le Golfe.",
+      "lowTideAdvantage": "La découpe des parcs à huîtres et des hauts-fonds apparaît avec netteté depuis les hauteurs.",
+      "warningNote": "Sommet venté en cas de brise thermique l'après-midi."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Le promontoire du Tumulus de Tumiac dominant le panorama de Rhuys",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "pointe-des-emigres",
+    "name": "Pointe des Émigrés",
+    "shortDescription": "Promenade littorale ombragée au départ du port de Vannes le long des marais et de la rivière.",
+    "fullDescription": "Aménagée sur les rives occidentales de la marée vannetaise, cette avancée verdoyante offre une transition douce entre la ville et la pleine mer. Les berges accueillent promeneurs, joggeurs et oiseaux migrateurs au milieu d'arbres remarquables et de prés-salés.",
+    "category": "TRAIL",
+    "commune": "Vannes",
+    "communeSlug": "vannes",
+    "sector": "VANNES",
+    "latitude": 47.6394,
+    "longitude": -2.7681,
+    "parkingLat": 47.6432,
+    "parkingLng": -2.7665,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["W", "SW", "NW"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": true,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 60,
+      "pricing": "Gratuit",
+      "amenities": ["toilets", "parking", "picnic_table", "shade"],
+      "insiderTip": "Idéal pour une balade matinale avant l'agitation urbaine : les bancs en bois font face au soleil levant sur la presqu'île de Séné.",
+      "goodToKnow": "Chemin stabilisé large parfaitement adapté aux poussettes et aux personnes à mobilité réduite.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "La ria est pleine d'eau et les canoës évoluent au ras du sentier.",
+      "lowTideAdvantage": "Observation privilégiée des oiseaux limicoles fouillant la vase.",
+      "warningNote": "Quelques tronçons très proches du niveau d'eau lors des très grandes marées de vives-eaux (coeff > 105)."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Cheminement bordé d'arbres et de roseaux à la Pointe des Émigrés",
+        "isCover": true
+      }
+    ]
+  },
+  {
+    "slug": "marais-de-sene",
+    "name": "Réserve Naturelle des Marais de Séné",
+    "shortDescription": "Réserve naturelle nationale d'exception, sanctuaire d'accueil pour des milliers d'oiseaux migrateurs d'Europe.",
+    "fullDescription": "Plus grand espace naturel protégé du Golfe du Morbihan, les Marais de Séné combinent d'anciens marais salants, des lagunes d'eau douce et des vasières marines. Des observatoires camouflés permettent d'admirer spatules blanches, échasses blanches et tadornes sans troubler leur quiétude.",
+    "category": "VIEWPOINT",
+    "commune": "Séné",
+    "communeSlug": "sene",
+    "sector": "VANNES",
+    "latitude": 47.6183,
+    "longitude": -2.7231,
+    "parkingLat": 47.6205,
+    "parkingLng": -2.7224,
+    "sourceType": "CURATED",
+    "contextualRules": {
+      "tideConstraint": "ALL_TIDES",
+      "shelteredFromWindDirections": ["N", "NE"],
+      "strollerFriendly": true,
+      "dogsAllowedSummer": false,
+      "rainFriendly": true
+    },
+    "practicalInfo": {
+      "recommendedDurationMinutes": 120,
+      "pricing": "Sentiers libres d'accès, centre d'accueil et sentier pédagogique payants",
+      "amenities": ["toilets", "water", "parking", "shade"],
+      "insiderTip": "Consultez les horaires de marée haute pour votre visite : les oiseaux des vasières viennent alors s'abriter sur les reposoirs des lagunes, au plus près des cabanes d'observation.",
+      "goodToKnow": "Prêt de jumelles et de longues-vues disponible au centre nature de la réserve.",
+      "bestSeason": ["SPRING", "SUMMER", "AUTUMN", "WINTER"]
+    },
+    "tideDetails": {
+      "highTideAdvantage": "Moment optimal pour l'observation : concentration maximale d'oiseaux sur les îlots intérieurs.",
+      "lowTideAdvantage": "Les oiseaux se dispersent sur l'estran de la baie de Kerphilippe.",
+      "warningNote": "Chiens formellement interdits dans le périmètre de la réserve, même tenus en laisse."
+    },
+    "photoGallery": [
+      {
+        "url": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+        "caption": "Lagunes et roselières de la réserve ornithologique de Séné",
+        "isCover": true
+      }
+    ]
+  }
+]
