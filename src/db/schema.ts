@@ -212,17 +212,17 @@ export type NewAmenity = typeof amenities.$inferInsert;
 export const itineraries = pgTable('itineraries', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: varchar('slug', { length: 32 }).notNull().unique(), // nanoid court: 'morbihan-x89f2'
-  territoryId: uuid('territory_id')
-    .references(() => territories.id)
-    .notNull(),
+  territoryId: uuid('territory_id').references(() => territories.id),
   title: varchar('title', { length: 255 }).notNull(),
-  baseCommune: varchar('base_commune', { length: 100 }).notNull(),
-  startDate: varchar('start_date', { length: 10 }).notNull(), // 'YYYY-MM-DD'
+  baseSector: varchar('base_sector', { length: 100 }).notNull(),
+  baseCommune: varchar('base_commune', { length: 100 }),
+  startDate: varchar('start_date', { length: 10 }),
   durationDays: integer('duration_days').notNull(),
-  profile: jsonb('profile').notNull(),
-  itineraryData: jsonb('itinerary_data').notNull(),
+  profile: jsonb('profile'),
+  itineraryData: jsonb('itinerary_data'),
+  escapadeData: jsonb('escapade_data').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 export type Territory = typeof territories.$inferSelect;
