@@ -42,7 +42,7 @@ const TOP_PLACES: PlaceMarkerData[] = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col pb-16">
+    <main className="min-h-screen bg-slate-50 flex flex-col pb-16">
       {/* Header Contextuel & Hero */}
       <header className="relative bg-white border-b border-slate-200/80 pt-8 pb-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
@@ -89,36 +89,36 @@ export default function HomePage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link
             href="/carte?cat=BEACH&maree=IDEAL_NOW"
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95"
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
-            <span className="text-3xl mb-1.5 select-none">🏖️</span>
+            <span className="text-3xl mb-1.5 select-none" aria-hidden="true">🏖️</span>
             <span className="font-semibold text-sm text-slate-800">Baignade idéale</span>
             <span className="text-xs text-slate-500 mt-0.5">Marée haute</span>
           </Link>
 
           <Link
             href="/carte?cat=TRAIL"
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95"
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
-            <span className="text-3xl mb-1.5 select-none">🥾</span>
+            <span className="text-3xl mb-1.5 select-none" aria-hidden="true">🥾</span>
             <span className="font-semibold text-sm text-slate-800">Sentiers ouverts</span>
             <span className="text-xs text-slate-500 mt-0.5">GR34 praticable</span>
           </Link>
 
           <Link
             href="/carte?cat=HERITAGE"
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95"
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
-            <span className="text-3xl mb-1.5 select-none">🏰</span>
+            <span className="text-3xl mb-1.5 select-none" aria-hidden="true">🏰</span>
             <span className="font-semibold text-sm text-slate-800">Patrimoine</span>
             <span className="text-xs text-slate-500 mt-0.5">Châteaux & Ports</span>
           </Link>
 
           <Link
             href="/carte?cat=GASTRONOMY"
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95"
+            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex flex-col items-center text-center transition-transform duration-100 active:scale-95 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
-            <span className="text-3xl mb-1.5 select-none">🦪</span>
+            <span className="text-3xl mb-1.5 select-none" aria-hidden="true">🦪</span>
             <span className="font-semibold text-sm text-slate-800">Huîtres & Terrasses</span>
             <span className="text-xs text-slate-500 mt-0.5">Vue mer</span>
           </Link>
@@ -146,6 +146,6 @@ export default function HomePage() {
           ))}
         </div>
       </section>
-    </div>
+    </main>
   );
 }
