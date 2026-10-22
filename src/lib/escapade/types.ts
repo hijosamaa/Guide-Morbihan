@@ -58,6 +58,7 @@ export interface EscapadeMoment {
   place: EscapadePlace;
   alternatives: EscapadePlace[];
   tideNotice?: string;
+  originalPlace?: EscapadePlace;
 }
 
 export interface EscapadeDay {
