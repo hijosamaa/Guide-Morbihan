@@ -63,13 +63,16 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
 const SPOT_SLUG_ALIASES: Record<string, string> = {
   berder: 'ile-de-berder',
   'passage-berder': 'ile-de-berder',
+  'passage-ile-de-berder': 'ile-de-berder',
   'ile-de-berder': 'ile-de-berder',
-  fogeo: 'plage-fogeo',
-  'plage-fogeo': 'plage-fogeo',
+  fogeo: 'plage-du-fogeo-arzon',
+  'plage-fogeo': 'plage-du-fogeo-arzon',
+  'plage-du-fogeo-arzon': 'plage-du-fogeo-arzon',
   'saint-goustan': 'port-saint-goustan',
   'port-saint-goustan': 'port-saint-goustan',
   suscinio: 'chateau-de-suscinio',
   'domaine-suscinio': 'chateau-de-suscinio',
+  'domaine-chateau-de-suscinio': 'chateau-de-suscinio',
   'chateau-de-suscinio': 'chateau-de-suscinio',
 };
 
@@ -147,7 +150,6 @@ function CarteExplorerContent() {
       setSelectedPlaceId(selectedSpot);
       setActiveSnapPoint(0.92);
     } else {
-      // Retour navigateur ou réinitialisation d'URL : referme la fiche et réinitialise le tiroir
       setSelectedPlaceId(null);
       setActiveSnapPoint(0.5);
     }
@@ -169,13 +171,13 @@ function CarteExplorerContent() {
   const handleSelectPlace = (place: PlaceMarkerData | Place) => {
     const slug = (place as Place).slug || place.id || '';
     setSelectedPlaceId(slug);
-    setActiveSnapPoint(0.92); // Ouvre en grand le tiroir à 0.92 lors de la sélection
+    setActiveSnapPoint(0.92);
     setSelectedSpot(slug, { shallow: true, history: 'push' });
   };
 
   const handleClosePlace = () => {
     setSelectedPlaceId(null);
-    setActiveSnapPoint(0.5); // Réinitialise le tiroir à mi-hauteur au retour à la liste
+    setActiveSnapPoint(0.5);
     setSelectedSpot('', { shallow: true, history: 'push' });
   };
 
@@ -200,8 +202,10 @@ function CarteExplorerContent() {
       <div className="hidden lg:flex h-full">
         <DesktopSplitExplorer
           places={filteredPlaces}
+          selectedPlace={selectedPlace}
           selectedPlaceId={effectiveSelectedId}
           onSelectPlace={handleSelectPlace}
+          onClosePlace={handleClosePlace}
           isRaining={rainOnly}
         />
       </div>

@@ -5,14 +5,14 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { EscapadeWizard, SECTOR_OPTIONS, PROFILE_OPTIONS } from '../src/components/escapade/EscapadeWizard';
 
 test('EscapadeWizard renders sector options and duration pills', () => {
-  const html = renderToStaticMarkup(<EscapadeWizard onGenerate={() => {}} />);
+  const html = renderToStaticMarkup(React.createElement(EscapadeWizard, { onGenerate: () => {} }));
   assert.ok(html.includes('Où logez-vous'), 'Must ask for base sector');
   assert.ok(html.includes('Presqu’île de Rhuys') || html.includes('Rhuys'), 'Must include Rhuys');
   assert.ok(html.includes('1 jour') || html.includes('Escapade 1 jour'), 'Must include duration');
 });
 
 test('EscapadeWizard renders all 4 sectors, duration pills, and 3 profile types', () => {
-  const html = renderToStaticMarkup(<EscapadeWizard onGenerate={() => {}} />);
+  const html = renderToStaticMarkup(React.createElement(EscapadeWizard, { onGenerate: () => {} }));
 
   // Sectors
   assert.ok(html.includes('Vannes') || html.includes('Golfe'), 'Must render Vannes/Golfe');
@@ -35,14 +35,14 @@ test('EscapadeWizard renders all 4 sectors, duration pills, and 3 profile types'
 
 test('EscapadeWizard applies aria-checked and preselects initialProfile values', () => {
   const html = renderToStaticMarkup(
-    <EscapadeWizard
-      initialProfile={{
+    React.createElement(EscapadeWizard, {
+      initialProfile: {
         baseSector: 'Presqu-ile de Quiberon',
         durationDays: 2,
         profileType: 'HERITAGE_GOURMET',
-      }}
-      onGenerate={() => {}}
-    />
+      },
+      onGenerate: () => {},
+    })
   );
 
   // Sector Quiberon checked
@@ -60,7 +60,7 @@ test('EscapadeWizard applies aria-checked and preselects initialProfile values',
 
 test('EscapadeWizard renders loading state when isGenerating is true', () => {
   const html = renderToStaticMarkup(
-    <EscapadeWizard onGenerate={() => {}} isGenerating={true} />
+    React.createElement(EscapadeWizard, { onGenerate: () => {}, isGenerating: true })
   );
 
   assert.ok(
@@ -71,7 +71,7 @@ test('EscapadeWizard renders loading state when isGenerating is true', () => {
 
 test('EscapadeWizard meets mobile touch target standards (>= 44px) and accessibility attributes', () => {
   const html = renderToStaticMarkup(
-    <EscapadeWizard onGenerate={() => {}} className="custom-wizard-test" />
+    React.createElement(EscapadeWizard, { onGenerate: () => {}, className: 'custom-wizard-test' })
   );
 
   assert.ok(html.includes('custom-wizard-test'), 'Must respect custom className');
