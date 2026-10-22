@@ -1,7 +1,7 @@
-import { db as defaultDb } from '../db/index.js';
-import { places, amenities } from '../db/schema.js';
-import type { OverpassElement, OverpassResponse, OsmSyncReport } from './types/osm.js';
-import type { NewPlace, NewAmenity } from '../db/schema.js';
+import { db as defaultDb } from '../db';
+import { places, amenities } from '../db/schema';
+import type { OverpassElement, OverpassResponse, OsmSyncReport } from './types/osm';
+import type { NewPlace, NewAmenity } from '../db/schema';
 
 export const MORBIHAN_BBOX = '47.45,-3.25,47.75,-2.60';
 

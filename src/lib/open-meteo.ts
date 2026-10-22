@@ -1,13 +1,13 @@
-import { db as defaultDb } from '../db/index.js';
-import { weatherSnapshots } from '../db/schema.js';
-import { degreesToCardinal } from './utils/geo.js';
+import { db as defaultDb } from '../db';
+import { weatherSnapshots } from '../db/schema';
+import { degreesToCardinal } from './utils/geo';
 import type {
   CoastalSectorKey,
   SectorConfig,
   OpenMeteoCurrentResponse,
   TransformedWeatherSnapshot,
   WeatherSyncReport,
-} from './types/weather.js';
+} from './types/weather';
 
 export const COASTAL_SECTORS: Record<CoastalSectorKey, SectorConfig> = {
   VANNES: {

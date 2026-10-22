@@ -6,6 +6,7 @@ import { GOLFE_MAP_CONFIG } from '@/lib/map-config';
 import { isPointInBounds } from '@/lib/map-utils';
 import { createPlaceMarkerElement } from './MapMarkers';
 import { MapControls } from './MapControls';
+import { useCameraOffset } from '@/lib/hooks/useCameraOffset';
 import type { GolfeMapProps, MapViewportBounds } from '@/lib/types/map';
 
 if (typeof window !== 'undefined') {
@@ -29,12 +30,17 @@ export function GolfeMap({
   className = 'w-full h-full min-h-[400px]',
   showControls = true,
   enableUserLocation = true,
+  activeSnapPoint = null,
 }: GolfeMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<maplibregl.Map | null>(null);
+  const [mapInstance, setMapInstance] = useState<maplibregl.Map | null>(null);
   const markersRef = useRef<Map<string, maplibregl.Marker>>(new Map());
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+
+  // Synchronise le décentrage de la caméra avec la position de la bottom sheet mobile
+  useCameraOffset(mapInstance, activeSnapPoint);
 
   const placesRef = useRef(places);
   placesRef.current = places;
@@ -88,6 +94,7 @@ export function GolfeMap({
 
     map.on('moveend', handleMoveEnd);
     mapInstanceRef.current = map;
+    setMapInstance(map);
 
     // Resize observer
     let resizeObserver: ResizeObserver | null = null;
@@ -110,6 +117,7 @@ export function GolfeMap({
       }
       map.remove();
       mapInstanceRef.current = null;
+      setMapInstance(null);
     };
   }, [initialCenter, initialZoom, interactive]);
 

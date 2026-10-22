@@ -11,6 +11,7 @@ export interface PlaceMarkerData {
   isSponsored?: boolean;
   score?: number;
   label?: string;
+  imageUrl?: string;
 }
 
 export interface MapViewportBounds {
@@ -45,6 +46,7 @@ export interface GolfeMapProps {
   className?: string;
   showControls?: boolean;
   enableUserLocation?: boolean;
+  activeSnapPoint?: string | number | null;
 }
 
 export interface GpxTrackViewerProps {

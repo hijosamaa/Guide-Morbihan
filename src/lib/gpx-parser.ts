@@ -4,8 +4,8 @@ import {
   haversineDistanceKm,
   calculateElevationGainWithHysteresis,
   estimateTrailDurationMinutes,
-} from './utils/geo.js';
-import type { ElevationPoint, ParsedGpxResult } from './types/gpx.js';
+} from './utils/geo';
+import type { ElevationPoint, ParsedGpxResult } from './types/gpx';
 
 export interface ParseGpxOptions {
   maxProfilePoints?: number;

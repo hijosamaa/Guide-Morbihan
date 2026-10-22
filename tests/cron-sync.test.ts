@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { GET, POST, handleSync, dynamic, maxDuration } from '../src/app/api/cron/sync/route.js';
+import { GET, POST, dynamic, maxDuration } from '../src/app/api/cron/sync/route';
+import { handleSync } from '../src/app/api/cron/sync/handler';
 
 test('route config exports dynamic=force-dynamic and maxDuration=60', () => {
   assert.equal(dynamic, 'force-dynamic');
