@@ -10,3 +10,6 @@ dist
 *.pem
 *.tsbuildinfo
 .superpowers
+data/guides/*.epub
+data/guides/*.pdf
+
