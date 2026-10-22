@@ -58,7 +58,7 @@ export function DesktopSplitExplorer({
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              {places.length} lieu{places.length > 1 ? 'x' : ''} trouvé{places.length > 1 ? 's' : ''}
+              {places.length} lieu{places.length > 1 ? 'x' : ''} trouvés
             </div>
 
             {places.map((place) => (
