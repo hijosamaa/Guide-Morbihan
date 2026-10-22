@@ -77,7 +77,7 @@ const MOCK_PLAN: EscapadePlan = {
 
 describe('Escapade Slug Generation & Share API Route', () => {
   test('generateEscapadeSlug builds readable Morbihan slug', async () => {
-    const { generateEscapadeSlug } = await import('../src/app/api/escapades/share/route');
+    const { generateEscapadeSlug } = await import('../src/lib/escapade/share-service');
     const slugRhuys = generateEscapadeSlug('Presqu-ile de Rhuys', 2);
     assert.match(slugRhuys, /^escapade-rhuys-2j-[a-z0-9]{5}$/);
 
@@ -92,7 +92,7 @@ describe('Escapade Slug Generation & Share API Route', () => {
   });
 
   test('generateEscapadeSlug handles accented sectors and custom names', async () => {
-    const { generateEscapadeSlug } = await import('../src/app/api/escapades/share/route');
+    const { generateEscapadeSlug } = await import('../src/lib/escapade/share-service');
     assert.match(generateEscapadeSlug("Presqu'île de Rhuys", 3), /^escapade-rhuys-3j-[a-z0-9]{5}$/);
     assert.match(generateEscapadeSlug("Presqu'île de Quiberon", 1), /^escapade-quiberon-1j-[a-z0-9]{5}$/);
     assert.match(generateEscapadeSlug("Ria d'Étel", 2), /^escapade-ria-etel-2j-[a-z0-9]{5}$/);
@@ -153,7 +153,7 @@ describe('Escapade Slug Generation & Share API Route', () => {
   });
 
   test('saveEscapade and getEscapadeBySlug work with mock Drizzle database', async () => {
-    const { saveEscapade, getEscapadeBySlug } = await import('../src/app/api/escapades/share/route');
+    const { saveEscapade, getEscapadeBySlug } = await import('../src/lib/escapade/share-service');
 
     let insertedRecord: any = null;
     const mockDb = {
@@ -188,7 +188,7 @@ describe('Escapade Slug Generation & Share API Route', () => {
 
 describe('Escapade Persistence & Shared Page (/escapade/[slug])', () => {
   test('Shared escapade page renders EscapadeView with plan details and action buttons', async () => {
-    const { saveEscapade } = await import('../src/app/api/escapades/share/route');
+    const { saveEscapade } = await import('../src/lib/escapade/share-service');
     const { slug } = await saveEscapade(MOCK_PLAN);
 
     const EscapadePageModule = await import('../src/app/escapade/[slug]/page');
@@ -209,7 +209,7 @@ describe('Escapade Persistence & Shared Page (/escapade/[slug])', () => {
   });
 
   test('Shared escapade page generateMetadata provides rich OpenGraph tags', async () => {
-    const { saveEscapade } = await import('../src/app/api/escapades/share/route');
+    const { saveEscapade } = await import('../src/lib/escapade/share-service');
     const { slug } = await saveEscapade(MOCK_PLAN);
 
     const { generateMetadata } = await import('../src/app/escapade/[slug]/page');

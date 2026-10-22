@@ -2,7 +2,7 @@ import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Sparkles, Compass, Share2 } from 'lucide-react';
-import { getEscapadeBySlug } from '../../api/escapades/share/route';
+import { getEscapadeBySlug } from '../../../lib/escapade/share-service';
 import { EscapadeView } from '../../../components/escapade/EscapadeView';
 
 interface EscapadePageProps {
