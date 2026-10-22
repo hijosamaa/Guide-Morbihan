@@ -110,6 +110,29 @@ test('PlaceCard renders image when imageUrl is provided', () => {
   assert.ok(richHtml.includes('https://images.unsplash.com/photo-example.jpg'));
 });
 
+test('PlaceCard renders accessible Next.js Link when href is provided', () => {
+  const linkRichHtml = renderToString(
+    React.createElement(PlaceCard, {
+      place: samplePlace,
+      variant: 'rich',
+      href: '/carte?spot=spot-1',
+    })
+  );
+  assert.ok(linkRichHtml.includes('href="/carte?spot=spot-1"'));
+  assert.ok(linkRichHtml.includes('<a'));
+  assert.ok(!linkRichHtml.includes('role="button"'), 'Links should not have role=button');
+
+  const linkCompactHtml = renderToString(
+    React.createElement(PlaceCard, {
+      place: samplePlace,
+      variant: 'compact',
+      href: '/carte?spot=spot-1',
+    })
+  );
+  assert.ok(linkCompactHtml.includes('href="/carte?spot=spot-1"'));
+  assert.ok(linkCompactHtml.includes('<a'));
+});
+
 test('PlaceCardSkeleton renders compact and rich skeletons', () => {
   const compactSkeleton = renderToString(React.createElement(PlaceCardSkeleton, { variant: 'compact' }));
   assert.ok(compactSkeleton.includes('animate-pulse'));

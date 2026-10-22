@@ -142,7 +142,12 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {TOP_PLACES.map((place) => (
-            <PlaceCard key={place.id} place={place} variant="rich" />
+            <PlaceCard
+              key={place.id}
+              place={place}
+              variant="rich"
+              href={`/carte?spot=${place.id}`}
+            />
           ))}
         </div>
       </section>

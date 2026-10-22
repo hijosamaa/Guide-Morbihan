@@ -57,3 +57,22 @@ test('CartePage renders map canvas container', () => {
     html.includes('Canevas Cartographique WebGL')
   );
 });
+
+test('CartePage filters places when searchParams are provided via NuqsTestingAdapter', () => {
+  const html = renderToString(
+    React.createElement(
+      NuqsTestingAdapter,
+      {
+        searchParams: { cat: 'BEACH' },
+        children: React.createElement(CartePage),
+      }
+    )
+  );
+
+  // Plage du Fogeo is BEACH, should be included
+  assert.ok(html.includes('Plage du Fogeo (Arzon)'));
+  // Château de Suscinio is HERITAGE, should be filtered out
+  assert.ok(!html.includes('Château de Suscinio'));
+  // Île de Berder is TRAIL, should be filtered out
+  assert.ok(!html.includes('Île de Berder'));
+});

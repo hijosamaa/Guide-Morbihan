@@ -17,4 +17,5 @@ test('HomePage renders hero, cta and intent buttons', () => {
   assert.ok(html.includes('aria-hidden="true"'), 'Emoji icons should be aria-hidden');
   assert.ok(html.includes('touch-manipulation'), 'Buttons should include touch-manipulation');
   assert.ok(html.includes('focus-visible:ring-emerald-500'), 'Intent buttons should include focus rings');
+  assert.ok(html.includes('href="/carte?spot=fogeo"'), 'Top spots cards should link directly to carte with spot query param');
 });

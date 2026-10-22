@@ -46,6 +46,7 @@ export interface GolfeMapProps {
   className?: string;
   showControls?: boolean;
   enableUserLocation?: boolean;
+  activeSnapPoint?: string | number | null;
 }
 
 export interface GpxTrackViewerProps {

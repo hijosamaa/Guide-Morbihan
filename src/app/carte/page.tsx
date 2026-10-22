@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
+import { useQueryState, parseAsString, parseAsBoolean } from 'nuqs';
 import { FloatingContextPill } from '@/components/context/FloatingContextPill';
 import { TidalAlertChip } from '@/components/context/TidalAlertChip';
 import { MobileExplorerSheet } from '@/components/explorer/MobileExplorerSheet';
 import { DesktopSplitExplorer } from '@/components/explorer/DesktopSplitExplorer';
 import { DynamicGolfeMap, MapSkeleton } from '@/components/map';
+import { useFilteredPlaces } from '@/lib/hooks/useFilteredPlaces';
 import type { PlaceMarkerData } from '@/lib/types/map';
 
 // Échantillon initial représentatif des lieux phares du Golfe
@@ -56,11 +58,30 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
 ];
 
 function CarteExplorerContent() {
+  const [selectedCat] = useQueryState('cat', parseAsString.withDefault('ALL'));
+  const [tideFilter] = useQueryState('maree', parseAsString.withDefault('ALL'));
+  const [shelteredFromWind] = useQueryState('vent', parseAsBoolean.withDefault(false));
+  const [rainOnly] = useQueryState('pluie', parseAsBoolean.withDefault(false));
+  const [selectedSpot, setSelectedSpot] = useQueryState('spot', parseAsString.withDefault(''));
+
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [activeSnapPoint, setActiveSnapPoint] = useState<string | number | null>('140px');
 
+  const filteredPlaces = useFilteredPlaces(INITIAL_PLACES, {
+    category: selectedCat,
+    tideFilter,
+    shelteredFromWind,
+    strollerOnly: false,
+    dogsOnly: false,
+    rainOnly,
+  });
+
+  const effectiveSelectedId = selectedPlaceId || selectedSpot || null;
+
   const handleSelectPlace = (place: PlaceMarkerData) => {
     setSelectedPlaceId(place.id);
+    setSelectedSpot(place.id, { shallow: true, history: 'replace' });
+    setActiveSnapPoint(0.5); // Ouvre le tiroir à mi-hauteur sur mobile lors du clic marqueur/carte
   };
 
   return (
@@ -83,9 +104,10 @@ function CarteExplorerContent() {
       {/* Volet Desktop (>= 1024px) */}
       <div className="hidden lg:flex h-full">
         <DesktopSplitExplorer
-          places={INITIAL_PLACES}
-          selectedPlaceId={selectedPlaceId}
+          places={filteredPlaces}
+          selectedPlaceId={effectiveSelectedId}
           onSelectPlace={handleSelectPlace}
+          isRaining={rainOnly}
         />
       </div>
 
@@ -95,20 +117,22 @@ function CarteExplorerContent() {
         className="flex-1 relative w-full h-full bg-slate-200 flex items-center justify-center"
       >
         <DynamicGolfeMap
-          places={INITIAL_PLACES}
-          selectedPlaceId={selectedPlaceId}
+          places={filteredPlaces}
+          selectedPlaceId={effectiveSelectedId}
           onSelectPlace={handleSelectPlace}
+          activeSnapPoint={activeSnapPoint}
           className="w-full h-full"
         />
       </section>
 
       {/* Bottom Sheet Mobile (< 1024px) */}
       <MobileExplorerSheet
-        places={INITIAL_PLACES}
-        selectedPlaceId={selectedPlaceId}
+        places={filteredPlaces}
+        selectedPlaceId={effectiveSelectedId}
         onSelectPlace={handleSelectPlace}
         activeSnapPoint={activeSnapPoint}
         onSnapChange={setActiveSnapPoint}
+        isRaining={rainOnly}
       />
     </main>
   );
