@@ -84,4 +84,10 @@ describe('Curated Spots Data Store', () => {
     const spot = findCuratedSpotBySlug('non-existent-spot-12345');
     assert.strictEqual(spot, undefined);
   });
+
+  it('caches parsed JSON in memory so subsequent calls return cached reference', () => {
+    const firstCall = getCuratedSpots();
+    const secondCall = getCuratedSpots();
+    assert.strictEqual(firstCall, secondCall, 'Subsequent calls must return identical cached array reference');
+  });
 });

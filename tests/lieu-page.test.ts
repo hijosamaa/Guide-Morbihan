@@ -19,6 +19,7 @@ describe('Standalone Place Page (/lieu/[slug])', () => {
     assert.ok(html.includes('Île de Berder'), 'Must render place title');
     assert.ok(html.includes('application/ld+json'), 'Must contain JSON-LD script tag');
     assert.ok(html.includes('TouristAttraction'), 'Must declare TouristAttraction schema');
+    assert.ok(html.includes('"image":'), 'Must declare image in JSON-LD');
     assert.ok(html.includes('Voir sur la carte'), 'Must contain back to map CTA');
   });
 

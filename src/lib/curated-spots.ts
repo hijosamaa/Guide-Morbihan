@@ -15,6 +15,7 @@ export interface CuratedSpotRecord {
   longitude: number;
   parkingLat?: number;
   parkingLng?: number;
+  coverImageUrl?: string;
   sourceType: PlaceSourceType;
   contextualRules: {
     tideConstraint: 'ALL_TIDES' | 'HIGH_TIDE_ONLY' | 'LOW_TIDE_ONLY' | 'MID_TIDE_FLOW';
@@ -30,11 +31,17 @@ export interface CuratedSpotRecord {
   photoGallery?: PhotoItem[];
 }
 
+let cachedSpots: CuratedSpotRecord[] | null = null;
+
 /**
  * Charge la liste des pépites et spots curés de manière souveraine depuis le fichier JSON local.
- * Opération synchrone zéro-coût runtime sans dépendance réseau.
+ * Opération synchrone zéro-coût runtime sans dépendance réseau avec cache en mémoire.
  */
 export function getCuratedSpots(): CuratedSpotRecord[] {
+  if (cachedSpots !== null) {
+    return cachedSpots;
+  }
+
   const candidates = [
     path.resolve(process.cwd(), 'data/curated-spots.json'),
     path.resolve(process.cwd(), '../data/curated-spots.json'),
@@ -43,7 +50,8 @@ export function getCuratedSpots(): CuratedSpotRecord[] {
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
       const raw = fs.readFileSync(candidate, 'utf-8');
-      return JSON.parse(raw) as CuratedSpotRecord[];
+      cachedSpots = JSON.parse(raw) as CuratedSpotRecord[];
+      return cachedSpots;
     }
   }
 

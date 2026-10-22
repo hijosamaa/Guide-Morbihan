@@ -23,13 +23,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const spot = await getPlaceBySlug(slug);
   if (!spot) return { title: 'Lieu non trouvé | Guide Morbihan' };
 
+  const imageUrl = spot.photoGallery?.[0]?.url || spot.coverImageUrl;
+
   return {
     title: `${spot.name} (${spot.commune}) | Guide Morbihan`,
     description: spot.shortDescription,
     openGraph: {
       title: `${spot.name} - Guide Morbihan`,
       description: spot.shortDescription,
-      images: spot.photoGallery?.[0]?.url ? [{ url: spot.photoGallery[0].url }] : [],
+      images: imageUrl ? [{ url: imageUrl }] : [],
     },
   };
 }
@@ -51,6 +53,7 @@ export default async function LieuPage({ params }: PageProps) {
     '@type': 'TouristAttraction',
     name: spot.name,
     description: spot.shortDescription,
+    image: spot.photoGallery?.[0]?.url || spot.coverImageUrl || undefined,
     geo: {
       '@type': 'GeoCoordinates',
       latitude: spot.latitude,

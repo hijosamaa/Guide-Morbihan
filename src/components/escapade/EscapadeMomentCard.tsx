@@ -237,6 +237,19 @@ export function EscapadeMomentCard({
               )}
             </a>
 
+            {/* Lien secondaire Waze vers le parking exact */}
+            {wazeUrl && (
+              <a
+                href={wazeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                aria-label={`Ouvrir dans Waze vers le parking de ${place.name}`}
+              >
+                <span>Waze</span>
+              </a>
+            )}
+
             {/* Lien secondaire fiche lieu si slug disponible */}
             {place.slug && (
               <a

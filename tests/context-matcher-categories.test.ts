@@ -108,6 +108,37 @@ describe('Category-Aware Context Evaluation', () => {
     assert.strictEqual(evaluation.badgeLabel, 'Idéal par temps pluvieux');
   });
 
+  it('tailors heritage badge to discouraging visit when outdoor site in rain', () => {
+    const rainyContext: MarineWeatherContext = {
+      ...dummyContext,
+      isRaining: true,
+    };
+
+    const megalithSite: Place = {
+      id: '3b',
+      slug: 'alignements-megalithes',
+      name: 'Alignements Mégalithiques',
+      shortDescription: 'Champ de menhirs en plein air',
+      category: 'HERITAGE',
+      commune: 'Carnac',
+      communeSlug: 'carnac',
+      sector: 'QUIBERON',
+      latitude: 47.59,
+      longitude: -3.08,
+      contextualRules: {
+        tideConstraint: 'ALL_TIDES',
+        dogsAllowedSummer: true,
+        strollerFriendly: true,
+        rainFriendly: false,
+      },
+      isSponsored: false,
+      updatedAt: new Date(),
+    };
+
+    const evaluation = evaluatePlaceContext(megalithSite, rainyContext, []);
+    assert.strictEqual(evaluation.badgeLabel, 'Visite sous la pluie déconseillée');
+  });
+
   it('tailors viewpoint badge to clear view in fair weather', () => {
     const viewpoint: Place = {
       id: '4',

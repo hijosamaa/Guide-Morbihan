@@ -206,6 +206,32 @@ describe('PlaceDetailView Subcomponents & Main View', () => {
       assert.ok(!html.includes('maps.google.com'), 'Should not render parking button without coords');
     });
 
+    it('falls back to coverImageUrl when photoGallery is absent or empty', () => {
+      const placeWithCover: Place = {
+        slug: 'spot-avec-cover',
+        name: 'Spot avec Cover Uniquement',
+        category: 'HERITAGE',
+        coverImageUrl: 'https://images.example.com/cover-custom.jpg',
+        contextualRules: {
+          tideConstraint: 'ALL_TIDES',
+          dogsAllowedSummer: true,
+          strollerFriendly: true,
+          rainFriendly: true,
+        },
+      };
+
+      const html = renderToStaticMarkup(
+        React.createElement(PlaceDetailView, {
+          place: placeWithCover,
+        })
+      );
+
+      assert.ok(
+        html.includes('https://images.example.com/cover-custom.jpg'),
+        'Must render coverImageUrl when photoGallery is missing'
+      );
+    });
+
     it('renders affiliate booking link when present', () => {
       const placeWithAffiliate: Place = {
         ...mockPlace,
