@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { FloatingContextPill } from '@/components/context/FloatingContextPill';
 import { TidalAlertChip } from '@/components/context/TidalAlertChip';
 import { MobileExplorerSheet } from '@/components/explorer/MobileExplorerSheet';
 import { DesktopSplitExplorer } from '@/components/explorer/DesktopSplitExplorer';
-import { DynamicGolfeMap } from '@/components/map';
+import { DynamicGolfeMap, MapSkeleton } from '@/components/map';
 import type { PlaceMarkerData } from '@/lib/types/map';
 
 // Échantillon initial représentatif des lieux phares du Golfe
@@ -55,16 +55,7 @@ const INITIAL_PLACES: PlaceMarkerData[] = [
   },
 ];
 
-/**
- * Route explorateur cartographique plein écran `/carte`.
- * 
- * Présente une disposition adaptative :
- * - Desktop (>= 1024px) : barre latérale partagée `DesktopSplitExplorer` avec filtres et fiches.
- * - Mobile (< 1024px) : tiroir gestuel `MobileExplorerSheet` à 3 points d'ancrage (140px, 50%, 92%).
- * - Centre : canevas cartographique `DynamicGolfeMap` MapLibre WebGL avec marqueurs interactifs.
- * - En haut à droite : pilule contextuelle flottante `FloatingContextPill` avec alertes marée urgentes.
- */
-export default function CartePage() {
+function CarteExplorerContent() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   const [activeSnapPoint, setActiveSnapPoint] = useState<string | number | null>('140px');
 
@@ -120,5 +111,17 @@ export default function CartePage() {
         onSnapChange={setActiveSnapPoint}
       />
     </main>
+  );
+}
+
+/**
+ * Route explorateur cartographique plein écran `/carte`.
+ * Enveloppé dans un Suspense boundary pour les hooks searchParams / nuqs.
+ */
+export default function CartePage() {
+  return (
+    <Suspense fallback={<MapSkeleton message="Chargement de l'explorateur..." height="h-screen" />}>
+      <CarteExplorerContent />
+    </Suspense>
   );
 }

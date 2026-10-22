@@ -493,10 +493,12 @@ flowchart LR
 
 ### Bloc 6 : SEO Programmatique & Monétisation Native
 * **Livrables :**
+  - Connecteur d'ingestion DATAtourisme (Flux 56) avec filtre sélectif de POI (patrimoine, sites naturels, mégalithes) et enrichissement des règles contextuelles.
   - Fiches dynamiques `/lieu/[slug]` et `/rando/[slug]` avec métadonnées enrichies (`generateMetadata`).
   - Pages de longue traîne `/explorer/[commune]/[categorie]` avec schémas JSON-LD `TouristAttraction` et `FAQPage`.
   - `sitemap.ts` et `robots.ts` dynamiques.
   - Composant d'appel à l'action affilié et bloc d'achat du "Pack Rando Hors-Ligne" Stripe Payment Links.
+  - *Backlog évolutions futures :* Ingestion des courants marins (Jument/Port-Navalo), module pêche à pied (réglet et alertes sanitaires ARS), intégration des petits passeurs (Saint-Armel - Séné) et générateur express d'escapade "Maintenant & Autour de moi".
 * **Validation :** Validation du balisage JSON-LD dans l'outil de test des résultats enrichis Google.
 
 ### Bloc 7 : PWA, Gestion Hors-Ligne & Carnet Sans Compte

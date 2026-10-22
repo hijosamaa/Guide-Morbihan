@@ -1,4 +1,4 @@
-import type { CardinalDirection } from '../utils/geo.js';
+import type { CardinalDirection } from '../utils/geo';
 
 export type CoastalSectorKey =
   | 'VANNES'
