@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, Map } from 'lucide-react';
-import { findCuratedSpotBySlug, getCuratedSpots } from '../../../lib/curated-spots';
-import { PlaceDetailView } from '../../../components/places/PlaceDetailView';
-import { Place } from '../../../lib/types/context';
+import { getPlaceBySlug, getLocalFallbackPlaces } from '@/lib/data/places';
+import { PlaceDetailView } from '@/components/places/PlaceDetailView';
+import type { Place } from '@/lib/types/context';
 
 export const revalidate = 86400;
 
@@ -14,14 +14,16 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const spots = getCuratedSpots();
+  const spots = getLocalFallbackPlaces();
   return spots.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const spot = findCuratedSpotBySlug(slug);
+  const spot = await getPlaceBySlug(slug);
   if (!spot) return { title: 'Lieu non trouvé | Guide Morbihan' };
+
+  const imageUrl = spot.photoGallery?.[0]?.url || spot.coverImageUrl;
 
   return {
     title: `${spot.name} (${spot.commune}) | Guide Morbihan`,
@@ -29,21 +31,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `${spot.name} - Guide Morbihan`,
       description: spot.shortDescription,
-      images: spot.photoGallery?.[0]?.url ? [{ url: spot.photoGallery[0].url }] : [],
+      images: imageUrl ? [{ url: imageUrl }] : [],
     },
   };
 }
 
 export default async function LieuPage({ params }: PageProps) {
   const { slug } = await params;
-  const spot = findCuratedSpotBySlug(slug);
+  const spot = await getPlaceBySlug(slug);
   if (!spot) notFound();
 
-  // Adapt to Place entity
   const placeEntity: Place = {
     ...spot,
-    id: spot.slug,
-    isSponsored: false,
+    id: spot.id || spot.slug,
+    isSponsored: spot.isSponsored ?? false,
     updatedAt: new Date(),
   };
 
@@ -52,6 +53,7 @@ export default async function LieuPage({ params }: PageProps) {
     '@type': 'TouristAttraction',
     name: spot.name,
     description: spot.shortDescription,
+    image: spot.photoGallery?.[0]?.url || spot.coverImageUrl || undefined,
     geo: {
       '@type': 'GeoCoordinates',
       latitude: spot.latitude,

@@ -286,7 +286,7 @@ export function mapDatatourismeToPlace(record: unknown): PartialPlace | null {
   const finalShortDesc = shortDesc || `${name}, site remarquable situé à ${commune}.`;
 
   const externalId = (typeof rec['@id'] === 'string' ? rec['@id'] : typeof rec.id === 'string' ? rec.id : undefined);
-  const slug = slugify(`${name}-${commune}`);
+  const slug = (typeof rec.slug === 'string' && rec.slug.trim()) ? rec.slug.trim() : slugify(`${name}-${commune}`);
   const sector = resolveSectorByCoords(coords.lat, coords.lng);
 
   // Règles contextuelles par défaut selon la typologie du lieu

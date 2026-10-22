@@ -351,7 +351,9 @@ export function evaluatePlaceContext(
   // 6. Libellé du badge adapté à la catégorie
   let badgeLabel = primaryReason || 'Conditions actuelles';
   if (isHeritage) {
-    badgeLabel = weatherContext.isRaining ? 'Idéal par temps pluvieux' : 'Visite conseillée';
+    badgeLabel = weatherContext.isRaining
+      ? (rules.rainFriendly ? 'Idéal par temps pluvieux' : 'Visite sous la pluie déconseillée')
+      : 'Visite conseillée';
   } else if (isGastronomy) {
     badgeLabel = 'Idéal pour une pause gourmande';
   } else if (isViewpoint) {

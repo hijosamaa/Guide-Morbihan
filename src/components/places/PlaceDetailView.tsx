@@ -28,6 +28,7 @@ import type {
 import { ContextBadge } from './ContextBadge';
 import { PhotoGallery } from './PhotoGallery';
 import { ParkingDirectButton } from './ParkingDirectButton';
+import { PlaceTrailSection } from './PlaceTrailSection';
 
 export interface PlaceDetailViewProps {
   place: Place;
@@ -87,6 +88,13 @@ export function PlaceDetailView({
   const practicalInfo: PracticalInfo | null | undefined = place.practicalInfo;
   const tideDetails: TideDetails | null | undefined = place.tideDetails;
 
+  const displayPhotos =
+    place.photoGallery && place.photoGallery.length > 0
+      ? place.photoGallery
+      : place.coverImageUrl
+        ? [{ url: place.coverImageUrl, caption: place.name, isCover: true }]
+        : undefined;
+
   return (
     <article
       className={`relative w-full max-w-3xl mx-auto flex flex-col bg-white text-slate-900 pb-12 ${className}`}
@@ -135,7 +143,7 @@ export function PlaceDetailView({
         </div>
 
         {/* Media Photo Gallery */}
-        <PhotoGallery photos={place.photoGallery} placeName={place.name} />
+        <PhotoGallery photos={displayPhotos} placeName={place.name} />
 
         {/* Real-time passage alert if present */}
         {context?.passageContext && (
@@ -329,6 +337,19 @@ export function PlaceDetailView({
               </p>
             )}
           </section>
+        )}
+
+        {/* GPX Trail and elevation profile if applicable */}
+        {(place.category === 'TRAIL' ||
+          place.trailData ||
+          place.slug.includes('berder') ||
+          place.slug.includes('moines') ||
+          place.slug.includes('conguel')) && (
+          <PlaceTrailSection
+            placeSlug={place.slug}
+            trailName={place.name}
+            gpxUrl={(place.trailData as any)?.gpxUrl}
+          />
         )}
 
         {/* Direct Parking GPS Access */}

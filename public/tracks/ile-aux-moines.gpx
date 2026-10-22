@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="Guide Morbihan" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>Grand Tour de l'Île-aux-Moines</name>
+    <desc>Sentier côtier faisant le tour complet de la perle du Golfe</desc>
+  </metadata>
+  <trk>
+    <name>Tour de l'Île-aux-Moines (GR34)</name>
+    <trkseg>
+      <trkpt lat="47.5965" lon="-2.8460"><ele>2.0</ele></trkpt>
+      <trkpt lat="47.6010" lon="-2.8475"><ele>6.5</ele></trkpt>
+      <trkpt lat="47.6080" lon="-2.8490"><ele>11.2</ele></trkpt>
+      <trkpt lat="47.6145" lon="-2.8465"><ele>14.8</ele></trkpt>
+      <trkpt lat="47.6180" lon="-2.8420"><ele>12.0</ele></trkpt>
+      <trkpt lat="47.6160" lon="-2.8360"><ele>9.5</ele></trkpt>
+      <trkpt lat="47.6090" lon="-2.8340"><ele>7.2</ele></trkpt>
+      <trkpt lat="47.6020" lon="-2.8355"><ele>8.6</ele></trkpt>
+      <trkpt lat="47.5950" lon="-2.8380"><ele>5.4</ele></trkpt>
+      <trkpt lat="47.5870" lon="-2.8410"><ele>13.5</ele></trkpt>
+      <trkpt lat="47.5790" lon="-2.8440"><ele>16.0</ele></trkpt>
+      <trkpt lat="47.5710" lon="-2.8465"><ele>18.5</ele></trkpt>
+      <trkpt lat="47.5640" lon="-2.8510"><ele>15.2</ele></trkpt>
+      <trkpt lat="47.5580" lon="-2.8560"><ele>11.0</ele></trkpt>
+      <trkpt lat="47.5520" lon="-2.8620"><ele>8.0</ele></trkpt>
+      <trkpt lat="47.5480" lon="-2.8680"><ele>5.5</ele></trkpt>
+      <trkpt lat="47.5450" lon="-2.8750"><ele>3.0</ele></trkpt>
+      <trkpt lat="47.5490" lon="-2.8780"><ele>7.5</ele></trkpt>
+      <trkpt lat="47.5560" lon="-2.8740"><ele>12.0</ele></trkpt>
+      <trkpt lat="47.5640" lon="-2.8690"><ele>15.4</ele></trkpt>
+      <trkpt lat="47.5730" lon="-2.8630"><ele>19.0</ele></trkpt>
+      <trkpt lat="47.5820" lon="-2.8570"><ele>14.5</ele></trkpt>
+      <trkpt lat="47.5900" lon="-2.8510"><ele>9.2</ele></trkpt>
+      <trkpt lat="47.5965" lon="-2.8460"><ele>2.0</ele></trkpt>
+    </trkseg>
+  </trk>
+</gpx>
